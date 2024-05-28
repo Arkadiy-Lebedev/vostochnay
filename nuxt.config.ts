@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss", "@hebilicious/vue-query-nuxt"],
 
   primevue: {
     cssLayerOrder: 'tailwind-base, primevue, tailwind-utilities'
@@ -25,4 +25,8 @@ export default defineNuxtConfig({
 
     }
   }
+
+   
+
+
 })

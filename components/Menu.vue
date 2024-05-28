@@ -9,7 +9,7 @@ import { items } from "./menu.data";
        <p class="mr-5">ЛОГО</p> 
     </template>
     <template #item="{ item, props, hasSubmenu, root }">
-        <a v-ripple class="flex items-end" v-bind="props.action">
+        <a v-ripple class="flex items-center" v-bind="props.action">
             <span :class="item.icon" />
             <span class="ml-2">{{ item.label }}</span>           
         </a>
