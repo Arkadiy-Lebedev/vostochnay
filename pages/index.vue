@@ -1,7 +1,27 @@
 <script setup lang="ts">
 
-
+  // const {data} = useQuery({
+  //   queryKey: ['counter'],
+  //   queryFn: () => $fetch('/api/counter')
+// })
 const readings = ref<number | null>(null)
+
+const { data, refresh  } = useFetch('/api/counter')
+
+
+const sendData = () => {
+const { data, refresh  } = useFetch('/api/counter', {
+    method: 'POST',
+  body: {
+      id_user: 1,      
+      lastCount: readings, }
+  })
+} 
+
+
+
+
+
 
 const tabs = ref([
     { title: 'Май 2024', count: '326' },
@@ -15,6 +35,7 @@ const tabs = ref([
 
 <template>
 <div class="container mx-auto">
+  {{ data }}
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
        <div class="flex gap-3 items-center">
         <p>Последние показания: </p> 
@@ -32,7 +53,7 @@ const tabs = ref([
 
         <div class="flex gap-2 mt-3 ">         
               <InputNumber  v-model="readings" inputId="withoutgrouping" placeholder="Показания" :min="0"  :useGrouping="false" />
-            <Button label="Передать" />
+            <Button @click="sendData" label="Передать" />
         </div>
 <h3 class="text-2xl mt-12">История показаний</h3>
         <div class="card mt-1">
