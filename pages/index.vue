@@ -1,16 +1,13 @@
 <script setup lang="ts">
 
-  // const {data} = useQuery({
-  //   queryKey: ['counter'],
-  //   queryFn: () => $fetch('/api/counter')
-// })
+
 const readings = ref<number | null>(null)
 
-const { data, refresh  } = useFetch('/api/counter')
-
+// const { data, refresh  } = useFetch('/api/counter')
+const { data, refresh  } = useFetch('/api/user')
 
 const sendData = () => {
-const { data, refresh  } = useFetch('/api/counter', {
+const { data  } = useFetch('/api/counter', {
     method: 'POST',
   body: {
       id_user: 1,      

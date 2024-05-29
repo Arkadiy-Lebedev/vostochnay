@@ -1,4 +1,15 @@
 import { sql } from '~~/server/db'
+import { default as jwt } from 'jsonwebtoken';
+
+
+const generateAccessToken = (id: number, role: string) => {
+  const payload = {
+    id,
+    role
+  }
+  return jwt.sign(payload, 'secret')
+}
+
 
 export type UserModel = {
     id: number,
@@ -13,6 +24,12 @@ export type UserModel = {
 }
 
 export const read = async () => {
+
+    //получение и декодирование токена
+    const token = generateAccessToken(1, 'юзер')
+    const decoderToken = jwt.verify(token, 'secret')
+   
+    
     const result = await sql({
         query: 'SELECT id, name, surname, family, street, number, phone, role FROM users'
     })
