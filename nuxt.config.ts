@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     cssLayerOrder: 'tailwind-base, primevue, tailwind-utilities'
 },
 
-    css: ['primevue/resources/themes/aura-light-green/theme.css', 'primeicons/primeicons.css', 'assets/css/main.css'],
+    css: ['primevue/resources/themes/aura-light-purple/theme.css', 'primeicons/primeicons.css', 'assets/css/main.css'],
 
     tailwindcss: {
       cssPath: ['~/assets/css/tailwind.css', { injectPosition: "first" }],

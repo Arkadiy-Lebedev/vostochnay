@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { useUserQuery } from '@/components/hooks/useUserQuery'
-import type { UserModel } from '~~/server/model/user'
-
-const users = ref<UserModel[]>([])
 
 
- const { isLoading, data } =  useUserQuery()
+const readings = ref<number | null>(null)
 
- users.value = data.value?.data as UserModel[]
-
-
+const tabs = ref([
+    { title: 'Май 2024', count: '326' },
+    { title: 'Апрель 2024', count: '150' },
+    { title: 'Март 2024', count: '60' }
+]);
 
 
 
@@ -17,37 +15,40 @@ const users = ref<UserModel[]>([])
 
 <template>
 <div class="container mx-auto">
-     <span v-if="isLoading">Loading...</span>
-
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
-        <p class="m-0">
-       {{ users }}
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis
-            aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
+       <div class="flex gap-3 items-center">
+        <p>Последние показания: </p> 
+        <Tag class="text-lg" severity="secondary" value="326 куб.м."></Tag> 
+       </div>
+<div class="flex gap-3 items-center">
+        <p>Дата: </p> 
+        <Tag  class="text-lg"  severity="secondary" value="15.05.2024"></Tag> 
+       </div>
+   
+        <div class="mt-10 flex items-center gap-x-4">
+          <h4 class="flex-none font-semibold leading-6 text-indigo-600">Передать показания</h4>
+          <div class="h-px flex-auto bg-gray-100"></div>
+        </div>
 
-        <Divider />
-
-        <p class="m-0">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam
-            voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
-        </p>
-
-        <Divider />
-
-        <p class="m-0">
-            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia
-            deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus.
-        </p>
-
-        <Divider />
-
-        <p class="m-0">
-            Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus
-            maiores alias consequatur aut perferendis doloribus asperiores repellat. Donec vel volutpat ipsum. Integer nunc magna, posuere ut tincidunt eget, egestas vitae sapien. Morbi dapibus luctus odio.
-        </p>
+        <div class="flex gap-2 mt-3 ">         
+              <InputNumber  v-model="readings" inputId="withoutgrouping" placeholder="Показания" :min="0"  :useGrouping="false" />
+            <Button label="Передать" />
+        </div>
+<h3 class="text-2xl mt-12">История показаний</h3>
+        <div class="card mt-1">
+        <Accordion :activeIndex="0">
+            <AccordionTab v-for="tab in tabs" :key="tab.title" :header="tab.title">
+                <p class="m-0">Показания: {{ tab.count }}</p>
+                <p class="m-0">Дата: {{ tab.count }}</p>
+                <p class="m-0">К оплате: 230. Оплачено: {{ tab.count }}</p>
+                <p class="m-0">Оплачено за общие нужды: {{ tab.count }}</p>
+            </AccordionTab>
+        </Accordion>
     </div>
 
-    
+      
+    </div>
+
+
 </div>
   </template>
