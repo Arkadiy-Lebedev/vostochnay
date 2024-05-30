@@ -2,13 +2,6 @@ import { sql } from '~~/server/db'
 import { default as jwt } from 'jsonwebtoken';
 
 
-const generateAccessToken = (id: number, role: string) => {
-  const payload = {
-    id,
-    role
-  }
-  return jwt.sign(payload, 'secret')
-}
 
 
 export type UserModel = {
@@ -20,26 +13,47 @@ export type UserModel = {
     number: string,
     phone: string,
     role: string,
-    password?: string
+    password: string
 }
 
+
+//чтение всех
 export const read = async () => {
 
-    //получение и декодирование токена
-    const token = generateAccessToken(1, 'юзер')
-    const decoderToken = jwt.verify(token, 'secret')
-   
-    
+ 
     const result = await sql({
         query: 'SELECT id, name, surname, family, street, number, phone, role FROM users'
     })
     return result as UserModel[]
 }
 
-export const create = async (data: Pick<UserModel, 'name' | 'surname' | 'family' | 'street' | 'number' | 'phone' | 'password'>) => {
+//чтение на проверку при регистрации
+export const readOneForReginPhone = async (data: Pick<UserModel, 'phone'>) => {   
     const result = await sql({
-        query: 'INSERT INTO users() name, surname, family, street, number, phone, password, role VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        query: 'SELECT * FROM users WHERE phone = ? AND role = ?',
+        values: [data.phone, 'user']
+    })
+    return result as UserModel[]
+}
+
+export const userOneForReginStreet = async (data: Pick<UserModel, 'street' | 'number'>) => {   
+   console.log(data)
+    const result = await sql({
+        query: 'SELECT * FROM users WHERE street = ? AND number = ?',
+        values: [data.street, data.number]
+    })
+    return result as UserModel[]
+}
+
+
+
+// создание юзера
+export const create = async (data: Pick<UserModel, 'name' | 'surname' | 'family' | 'street' | 'number' | 'phone' | 'password'>) => {
+    console.log(data)
+    const result = await sql({
+        query: 'INSERT INTO users( name, surname, family, street, number, phone, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         values: [data.name, data.surname, data.family, data.street, data.number, data.phone, data.password, 'user']
     }) as any
-    return result.length === 1 ? result[0] as UserModel : null
+    console.log('результат', result)
+    return result
 }
