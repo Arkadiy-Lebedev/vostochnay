@@ -29,6 +29,17 @@ export const read = async () => {
     return result as CounterModel[]
 }
 
+
+export const readForId = async (data: { id: number }) => {
+    const result = await sql({
+        query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, c.id_user FROM list c WHERE c.id_user = ?',
+         values: [data.id]
+    })
+    return result as CounterModel[]
+}
+
+
+
 export const create = async (data: Pick<CounterModel, 'items' |  'id_user' | 'lastCount' | 'dateLastCount'>) => {
     const result = await sql({
         query: 'INSERT INTO users() items,  id_user, lastCount, dateLastCount VALUES (?, ?, ?, ?)',

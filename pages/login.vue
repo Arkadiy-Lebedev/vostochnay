@@ -3,22 +3,19 @@ definePageMeta({
   layout: 'auth'
 })
 
-type TUser = {
-     phone: string,
-    password: string | null
-}
-type TError = {
-  isError: boolean,
-  text: string,
-  
-}
+import { useUserStore } from '../stores/user.store'
+import type { ILoginUser, IUser } from '@/types/user.types'
+import type { IError } from '@/types/helper.types'
 
-const user = reactive<TUser>({
+   const {userInfo} = useUserStore()
+
+
+const user = reactive<ILoginUser>({
     phone: '',
     password: null
 })
 
-const errors = reactive<TError>({
+const errors = reactive<IError>({
     isError: false,
     text: '',
 }) 
@@ -29,9 +26,10 @@ const sendLogin = async () => {
     errors.isError=false
     isLoad.value = true
 
-    const { data, error, pending  } = await useFetch('/api/user/login', {
-        method: 'POST',
-    body:  user
+  const { data, error, pending } = await useFetch<{user:IUser, token:string}, any, any>('/api/user/login', {
+      method: 'POST',
+      body: user,
+      watch:false
     })
 
 isLoad.value = pending.value
@@ -41,15 +39,25 @@ if(error.value){
         errors.text = error.value?.data?.statusMessage
     }
 
+  if (data.value) {  
+  userInfo.name = data.value.user.name
+  userInfo.surname = data.value.user.surname
+  userInfo.family = data.value.user.family
+  userInfo.phone = data.value.user.phone
+  userInfo.role = data.value.user.role
+  userInfo.street = data.value.user.street
+  userInfo.house = data.value.user.house
+  
+  localStorage.setItem('tokenUser', data.value.token)
+  await navigateTo('/')
+}
 
-console.log(data.value)
 }
 
 </script>
 
 <template>
 
-<p v-if="isLoad">sdfsdfsdf</p>
 <div class="flex min-h-dvh flex-col justify-center px-6 py-12 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
     <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company">
@@ -66,8 +74,9 @@ console.log(data.value)
       </div>
       <div class="w-full">
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Пароль</label>
-        <div class="mt-2 w-full">     
-    <InputText class="w-full" v-model="user.password"  placeholder="Пароль" />
+        <div class="mt-2 w-full">    
+           <Password  v-model="user.password" toggleMask :feedback="false"/> 
+   
         </div>
       </div>
       <div>

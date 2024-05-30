@@ -1,18 +1,43 @@
 <script setup lang="ts">
 
+const token = ref("")
+
+const counterUser = ref([])
+
+onMounted(() => {
+
+  if (localStorage.getItem('tokenUser') !== null) {
+    token.value =  String(localStorage.getItem('tokenUser'))
+  }
+
+  fetchCounter()  
+}
+)
+
+const fetchCounter = async () => {
+  const { data, refresh } = await useFetch('/api/counter/user', {
+   headers: {
+    Authorization: token.value
+  }
+}
+  )
 
 const readings = ref<number | null>(null)
 
+  counterUser.value = data.value?.data
+ console.log(data) 
+}
+
 // const { data, refresh  } = useFetch('/api/counter')
-const { data, refresh  } = useFetch('/api/user')
+
 
 const sendData = () => {
-const { data  } = useFetch('/api/counter', {
-    method: 'POST',
-  body: {
-      id_user: 1,      
-      lastCount: readings, }
-  })
+// const { data  } = useFetch('/api/counter', {
+//     method: 'POST',
+//   body: {
+//       id_user: 1,      
+//       lastCount: readings, }
+//   })
 } 
 
 
@@ -32,7 +57,7 @@ const tabs = ref([
 
 <template>
 <div class="container mx-auto">
-  {{ data }}
+{{ counterUser }}
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
        <div class="flex gap-3 items-center">
         <p>Последние показания: </p> 

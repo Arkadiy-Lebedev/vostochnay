@@ -1,8 +1,12 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss", "@hebilicious/vue-query-nuxt"],
+  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss", "@hebilicious/vue-query-nuxt", '@pinia/nuxt'],
 
+  pinia: {
+    storesDirs: ['./stores/**'],
+  },
+  
   primevue: {
     cssLayerOrder: 'tailwind-base, primevue, tailwind-utilities'
 },
@@ -24,7 +28,8 @@ export default defineNuxtConfig({
       Roboto: true,
 
     }
-  }
+  },
+  
 
    
 

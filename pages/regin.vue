@@ -2,25 +2,9 @@
 definePageMeta({
   layout: 'auth'
 })
+import type { IUserLogin } from '@/types/user.types'
+import type { IError } from '@/types/helper.types'
 
-const router = useRouter()
-
-type TUser = {
-     phone: string,
-     name: string,
-     surname: string,
-     family: string,
-    password: string | null,
-    repeatPassword: string | null,
-    street:'',
-    house: number | null
-}
-
-type TError = {
-  isError: boolean,
-  text: string,
-  
-}
 
 
 const streets = ref<{street:string}[]>([
@@ -31,11 +15,11 @@ const streets = ref<{street:string}[]>([
 
 const isLoad = ref(false)
 
-const user = reactive<TUser>({
+const user = reactive<IUserLogin>({
     phone: '',
     name: '',
-     surname: '',
-     family: '',
+    surname: '',
+    family: '',
     password:  null,
     repeatPassword:  null,
     street: '',
@@ -43,31 +27,32 @@ const user = reactive<TUser>({
 
 }) 
 
-const errors = reactive<TError>({
+const errors = reactive<IError>({
     isError: false,
     text: '',
 }) 
 const sendRegin = async () => {
   errors.isError = false
   isLoad.value = true
-  // if(user.password != user.repeatPassword){
-  //   error.isError = true
-  //   error.text = "Пароли не совпадают"
-  //   return
-  // }
+  if(user.password != user.repeatPassword){
+    errors.isError = true
+    errors.text = "Пароли не совпадают"
+    return
+  }
 
-//   let key: keyof typeof user;
-//   for ( key in user) {
-//  if(!user[key] || user[key] == ''){
-//   error.isError = true
-//     error.text = "Все поля обязательны для заполнения"
-//   return 
-//  }
-// }
-const formData = {...user}
+  let key: keyof typeof user;
+  for ( key in user) {
+ if(!user[key] || user[key] == ''){
+  errors.isError = true
+    errors.text = "Все поля обязательны для заполнения"
+  return 
+ }
+}
+
 const { data, error, pending   } = await useFetch('/api/user/regin', {
     method: 'POST',
-  body:  formData
+  body: user,
+  watch: false
 })
 
 isLoad.value = pending.value
@@ -78,13 +63,11 @@ if(error.value){
         return
     }
 
-    if(data.value.data.status){
-      router.push({ path: "/login" })
+    if(data.value.data.status){   
+      navigateTo('/login')
     }
 
 }
-
-
 </script>
 
 <template>

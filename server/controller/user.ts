@@ -2,6 +2,7 @@ import { H3Event } from 'h3'
 import bcrypt from "bcrypt";
 import * as userModel from '~~/server/model/user'
 import { default as jwt } from 'jsonwebtoken';
+import {SECRET} from '~~/server/secret'
 
 
 const generateAccessToken = (id: number, role: string) => {
@@ -9,7 +10,7 @@ const generateAccessToken = (id: number, role: string) => {
     id,
     role
   }
-  return jwt.sign(payload, 'secret')
+  return jwt.sign(payload, SECRET)
 }
 
 //чтение всех пользователей
@@ -120,20 +121,25 @@ if (!validPassword) {
     try {
     //получение токена
     const token = generateAccessToken(user[0].id, user[0].role)
-    // const decoderToken = jwt.verify(token, 'secret')
-     
-        return {
-            data:{
-                token:token,
-                user: {               
+        // const decoderToken = jwt.verify(token, SECRET)
+        
+        const dataUser = {
                     name: user[0].name,
                     surname: user[0].surname,
                     family: user[0].family,
                     street: user[0].street,
-                    number: user[0].number,
-                    phone: user[0].phone                    
-                }
-            }
+                    house: user[0].number,
+                    phone: user[0].phone,
+                    role: ''
+        }
+
+        if (user[0].role !== "user") {
+            dataUser.role = user[0].role
+        }
+     
+        return {
+                token:token,
+                user: dataUser    
         }
     } catch {
         throw createError({

@@ -30,8 +30,8 @@ export const read = async () => {
 //чтение на проверку при регистрации
 export const readOneForReginPhone = async (data: Pick<UserModel, 'phone'>) => {   
     const result = await sql({
-        query: 'SELECT * FROM users WHERE phone = ? AND role = ?',
-        values: [data.phone, 'user']
+        query: 'SELECT * FROM users WHERE phone = ? ',
+        values: [data.phone]
     })
     return result as UserModel[]
 }

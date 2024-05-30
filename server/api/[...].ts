@@ -9,6 +9,7 @@ router.post('/user/regin', defineEventHandler(userCtrl.create))
 router.post('/user/login', defineEventHandler(userCtrl.loginUser))
 
 router.get('/counter', defineEventHandler(counterCtrl.read))
+router.get('/counter/user', defineEventHandler(counterCtrl.userForToken))
 router.post('/counter', defineEventHandler(counterCtrl.create))
 
 export default useBase('/api', router.handler)
