@@ -1,75 +1,41 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 
-const token = ref("")
-const isMointed = ref(false)
-
-const counterUser = ref([])
+import type { CounterModel } from '~~/server/model/counter'
 
 
+console.log(dayjs().millisecond(1))
 
-onMounted(async() => {
-  console.log(localStorage.getItem('tokenUser'))
-  if (localStorage.getItem('tokenUser') !== null) {
-    token.value = String(localStorage.getItem('tokenUser'))
-      
-  }
-   fetchCounter(String(localStorage.getItem('tokenUser'))) 
-  isMointed.value=true
-  
-
-
-
-
-}
-
-)
-
-// watch(readyForClientFetch.value, (newVal, old) => {
-//   if ((newVal) === true) {
-//     refresh()
-//   }
-// },
-//   { immediate: true }
-// )
-
-
-
-
-const fetchCounter = async (tt: string) => {
-  console.log(545456)
-    const { data, refresh, status } = await useFetch('/api/counter/user', {
-    headers: {
-      Authorization: tt
-    }
-  }
-  )
-  
-}
-
-
-
+ const tokenCookie = useCookie('tokenUser')
+const counterUser = ref<CounterModel | []>([])
 const readings = ref<number | null>(null)
+ 
 
-//   counterUser.value = data.value?.data
-//  console.log(data) 
+   const { data, refresh } = await useFetch('/api/counter/user', {
+    onResponse({ response }) {
+      counterUser.value=response._data.data[0]
+      console.log(response._data.data)
+  },
+    headers: {
+      Authorization: String(tokenCookie.value),
+    },
+    server:false
+  })
 
 
-// const { data, refresh  } = useFetch('/api/counter')
 
-
-const sendData = () => {
-// const { data  } = useFetch('/api/counter', {
-//     method: 'POST',
-//   body: {
-//       id_user: 1,      
-//       lastCount: readings, }
-//   })
+const sendData = async () => {
+const { data  } = await useFetch('/api/counter/add', {
+    method: 'POST',
+  body: {      
+      lastCount: readings.value, 
+    },
+      headers: {
+      Authorization: String(tokenCookie.value),
+    }
+  })
+  refresh()
 } 
-
-
-
-
-
 
 const tabs = ref([
     { title: 'Май 2024', count: '326' },
@@ -82,13 +48,12 @@ const tabs = ref([
 </script>
 
 <template>
-  {{ token }}
+
 <div class="container mx-auto">
-{{ counterUser }}
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
        <div class="flex gap-3 items-center">
-        <p @click="fetchCounter(token)">Последние показания: </p> 
-        <Tag class="text-lg" severity="secondary" value="326 куб.м."></Tag> 
+        <p>Последние показания: {{ counterUser }} </p> 
+        <Tag class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'"></Tag> 
        </div>
 <div class="flex gap-3 items-center">
         <p>Дата: </p> 

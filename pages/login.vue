@@ -8,6 +8,7 @@ import type { ILoginUser, IUser } from '@/types/user.types'
 import type { IError } from '@/types/helper.types'
 
    const {userInfo} = useUserStore()
+   const tokenCookie = useCookie('tokenUser')
 
 
 const user = reactive<ILoginUser>({
@@ -48,7 +49,8 @@ if(error.value){
   userInfo.street = data.value.user.street
   userInfo.house = data.value.user.house
   
-  localStorage.setItem('tokenUser', data.value.token)
+  tokenCookie.value = data.value.token
+
   await navigateTo('/')
 }
 

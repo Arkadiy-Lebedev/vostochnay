@@ -4,11 +4,12 @@ export type ItemModel = {
     year: string,
     month: string,
     count: number,
-    toPay: number,
-    pay: number,
-    datePay: string,
+    dateCount: number,
+    toPay: number | null,
+    pay: number | null,
+    datePay: number | null,
     isPay: boolean,
-    payOur: number,
+    payOur: number | null,
     comment: string
 }
 
@@ -41,9 +42,29 @@ export const readForId = async (data: { id: number }) => {
 
 
 export const create = async (data: Pick<CounterModel, 'items' |  'id_user' | 'lastCount' | 'dateLastCount'>) => {
+    console.log(data.items)
     const result = await sql({
-        query: 'INSERT INTO users() items,  id_user, lastCount, dateLastCount VALUES (?, ?, ?, ?)',
-        values: [data.items, data.id_user, data.lastCount, data.dateLastCount]
+        query: 'INSERT INTO list  (id_user, items, lastCount, dateLastCount)  VALUES (?, ?, ?, ?)',
+        values: [data.id_user, JSON.stringify(data.items),  data.lastCount, data.dateLastCount]
     }) as any
+
+    return result.length === 1 ? result[0] as CounterModel : null
+}
+
+// export const update = async (data: Pick<CounterModel, 'items' |  'id_user' | 'lastCount' | 'dateLastCount'>) => {   
+//     const result = await sql({
+//         query: 'UPDATE list SET items = ?, lastCount = ?, dateLastCount =? WHERE id_user=?',
+//         values: [ JSON.stringify(data.items),  data.lastCount, data.dateLastCount, data.id_user]
+//     }) as any
+
+//     return result.length === 1 ? result[0] as CounterModel : null
+// }
+
+export const updateCounterInAddMonthUser = async (data: Pick<CounterModel, 'items' |  'id_user' | 'lastCount' | 'dateLastCount'>) => {   
+    const result = await sql({
+        query: 'UPDATE list SET items = ?, lastCount = ?, dateLastCount =? WHERE id_user=?',
+        values: [ JSON.stringify(data.items),  data.lastCount, data.dateLastCount, data.id_user]
+    }) as any
+
     return result.length === 1 ? result[0] as CounterModel : null
 }
