@@ -1,32 +1,58 @@
 <script setup lang="ts">
 
 const token = ref("")
+const isMointed = ref(false)
 
 const counterUser = ref([])
 
-onMounted(() => {
 
+
+onMounted(async() => {
+  console.log(localStorage.getItem('tokenUser'))
   if (localStorage.getItem('tokenUser') !== null) {
-    token.value =  String(localStorage.getItem('tokenUser'))
+    token.value = String(localStorage.getItem('tokenUser'))
+      
   }
+   fetchCounter(String(localStorage.getItem('tokenUser'))) 
+  isMointed.value=true
+  
 
-  fetchCounter()  
+
+
+
 }
+
 )
 
-const fetchCounter = async () => {
-  const { data, refresh } = await useFetch('/api/counter/user', {
-   headers: {
-    Authorization: token.value
+// watch(readyForClientFetch.value, (newVal, old) => {
+//   if ((newVal) === true) {
+//     refresh()
+//   }
+// },
+//   { immediate: true }
+// )
+
+
+
+
+const fetchCounter = async (tt: string) => {
+  console.log(545456)
+    const { data, refresh, status } = await useFetch('/api/counter/user', {
+    headers: {
+      Authorization: tt
+    }
   }
-}
   )
+  
+}
+
+
 
 const readings = ref<number | null>(null)
 
-  counterUser.value = data.value?.data
- console.log(data) 
-}
+//   counterUser.value = data.value?.data
+//  console.log(data) 
+
 
 // const { data, refresh  } = useFetch('/api/counter')
 
@@ -56,11 +82,12 @@ const tabs = ref([
 </script>
 
 <template>
+  {{ token }}
 <div class="container mx-auto">
 {{ counterUser }}
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
        <div class="flex gap-3 items-center">
-        <p>Последние показания: </p> 
+        <p @click="fetchCounter(token)">Последние показания: </p> 
         <Tag class="text-lg" severity="secondary" value="326 куб.м."></Tag> 
        </div>
 <div class="flex gap-3 items-center">
