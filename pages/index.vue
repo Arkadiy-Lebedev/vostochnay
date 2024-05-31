@@ -7,7 +7,7 @@ import type { CounterModel } from '~~/server/model/counter'
 console.log(dayjs().millisecond(1))
 
  const tokenCookie = useCookie('tokenUser')
-const counterUser = ref<CounterModel | []>([])
+const counterUser = ref<CounterModel >()
 const readings = ref<number | null>(null)
  
 
