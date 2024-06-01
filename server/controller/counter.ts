@@ -64,9 +64,12 @@ const decoderToken = examinationToken(token)
 
 //добавить показания от юзера
 export const create = async (evt: H3Event) => {
+    
+
     try {        
-        const body = await readBody(evt) 
-     
+         const body = await readBody(evt) 
+        console.log(body)
+         console.log('body')
              if(!body.lastCount){
             throw createError({
                 statusCode: 500,
@@ -76,7 +79,8 @@ export const create = async (evt: H3Event) => {
         const token = getHeaders(evt).authorization
         const decoderToken = examinationToken(token)
 
-         const findCounterFoIdUser  = await counterModel.readForId({id:decoderToken.id})       
+        const findCounterFoIdUser = await counterModel.readForId({ id: decoderToken.id }) 
+    
 
          const month = dayjs().format('MMMM')
         const year = dayjs().format('YYYY')
@@ -95,7 +99,8 @@ export const create = async (evt: H3Event) => {
 
          if(findCounterFoIdUser.length ==0){            
              const result  = await counterModel.create({id_user:decoderToken.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: [item]})     
-             return{
+               
+             return {
                 data:result
              }
          } 

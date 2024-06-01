@@ -11,7 +11,7 @@ const counterUser = ref<CounterModel >()
 const readings = ref<number | null>(null)
  
 
-   const { data, refresh } = await useFetch('/api/counter/user', {
+   const { data, refresh, pending } = await useFetch('/api/counter/user', {
     onResponse({ response }) {
       counterUser.value=response._data.data[0]
       console.log(response._data.data)
@@ -25,7 +25,7 @@ const readings = ref<number | null>(null)
 
 
 const sendData = async () => {
-const { data  } = await useFetch('/api/counter/add', {
+const { error  } = await useFetch('/api/counter/add', {
     method: 'POST',
   body: {      
       lastCount: readings.value, 
@@ -48,7 +48,7 @@ const tabs = ref([
 </script>
 
 <template>
-
+<p v-if="pending">Загрузка</p>
 <div class="container mx-auto">
   <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
        <div class="flex gap-3 items-center">

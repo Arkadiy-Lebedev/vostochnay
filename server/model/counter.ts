@@ -26,7 +26,7 @@ export type CounterModel = {
 export const read = async () => {
     const result = await sql({
         query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, p.id AS id_user FROM list c LEFT JOIN users p ON c.id_user = p.id'
-    })
+    })  
     return result as CounterModel[]
 }
 
@@ -42,7 +42,7 @@ export const readForId = async (data: { id: number }) => {
 
 
 export const create = async (data: Pick<CounterModel, 'items' |  'id_user' | 'lastCount' | 'dateLastCount'>) => {
-    console.log(data.items)
+
     const result = await sql({
         query: 'INSERT INTO list  (id_user, items, lastCount, dateLastCount)  VALUES (?, ?, ?, ?)',
         values: [data.id_user, JSON.stringify(data.items),  data.lastCount, data.dateLastCount]
