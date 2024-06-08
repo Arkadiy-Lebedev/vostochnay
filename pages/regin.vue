@@ -55,7 +55,7 @@ const { data, error, pending   } = await useFetch('/api/user/regin', {
   watch: false
 })
 
-isLoad.value = pending.value
+isLoad.value = false
 
 if(error.value){   
         errors.isError=true

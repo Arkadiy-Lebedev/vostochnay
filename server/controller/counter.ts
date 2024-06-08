@@ -65,8 +65,6 @@ const decoderToken = examinationToken(token)
 //добавить показания от юзера
 export const create = async (evt: H3Event) => {
     
-
-    try {        
          const body = await readBody(evt) 
         console.log(body)
          console.log('body')
@@ -76,6 +74,8 @@ export const create = async (evt: H3Event) => {
                 statusMessage: 'Не верные показания.'
             })
         }
+
+        try {   
         const token = getHeaders(evt).authorization
         const decoderToken = examinationToken(token)
 

@@ -1,20 +1,18 @@
 interface IMenu {
     label:string,
-    icon:string
+    icon: string,
+    link: string,
 }
 
 export const items = ref<IMenu[]>([
     {
         label: 'Главная',
-        icon: 'pi pi-home'
+        icon: 'pi pi-home',
+        link: '/'
     },
     {
-        label: 'Передать показания',
-        icon: 'pi pi-star'
-    },   
-    {
-        label: 'Список',
-        icon: 'pi pi-envelope'
-      
+        label: 'Общий счетчик',
+        icon: 'pi pi-star',
+        link: '/total-counter'
     }
 ]);

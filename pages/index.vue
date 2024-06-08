@@ -1,89 +1,126 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import 'dayjs/locale/ru'
+
 
 import type { CounterModel } from '~~/server/model/counter'
 
 
 console.log(dayjs().millisecond(1))
 
- const tokenCookie = useCookie('tokenUser')
-const counterUser = ref<CounterModel >()
+const tokenCookie = useCookie('tokenUser')
+const counterUser = ref<CounterModel>()
 const readings = ref<number | null>(null)
- 
 
-   const { data, refresh, pending } = await useFetch('/api/counter/user', {
-    onResponse({ response }) {
-      counterUser.value=response._data.data[0]
-      console.log(response._data.data)
-  },
-    headers: {
-      Authorization: String(tokenCookie.value),
-    },
-    server:false
+const dataMounth = computed(() => {
+  const newArray = counterUser.value ? [...counterUser.value?.items] : []
+  return newArray.reverse()
+})
+
+const iaNowMonth = computed(() => {
+  let status = false
+  counterUser.value?.items.forEach(el => {
+    if (el.month == dayjs().format('MMMM')) {
+      status = true
+    }
   })
+  return status
+})
+
+
+const { data, refresh, pending } = await useFetch('/api/counter/user', {
+  onResponse({ response }) {
+    counterUser.value = response._data.data[0]
+    console.log(response._data.data)
+  },
+  headers: {
+    Authorization: String(tokenCookie.value),
+  },
+  server: false
+})
 
 
 
 const sendData = async () => {
-const { error  } = await useFetch('/api/counter/add', {
+  const { error } = await useFetch('/api/counter/add', {
     method: 'POST',
-  body: {      
-      lastCount: readings.value, 
+    body: {
+      lastCount: readings.value,
     },
-      headers: {
+    headers: {
       Authorization: String(tokenCookie.value),
     }
   })
   refresh()
-} 
-
-const tabs = ref([
-    { title: 'Май 2024', count: '326' },
-    { title: 'Апрель 2024', count: '150' },
-    { title: 'Март 2024', count: '60' }
-]);
+}
 
 
 
 </script>
 
 <template>
-<p v-if="pending">Загрузка</p>
-<div class="container mx-auto">
-  <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
-       <div class="flex gap-3 items-center">
-        <p>Последние показания: {{ counterUser }} </p> 
-        <Tag class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'"></Tag> 
-       </div>
-<div class="flex gap-3 items-center">
-        <p>Дата: </p> 
-        <Tag  class="text-lg"  severity="secondary" value="15.05.2024"></Tag> 
-       </div>
-   
-        <div class="mt-10 flex items-center gap-x-4">
-          <h4 class="flex-none font-semibold leading-6 text-indigo-600">Передать показания</h4>
-          <div class="h-px flex-auto bg-gray-100"></div>
+  <div class="container mx-auto">
+    <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
+      <div class="flex gap-3 items-center">
+        <p>Последние показания: </p>
+        <div class="">
+
+          <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+          <Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'"></Tag>
         </div>
 
-        <div class="flex gap-2 mt-3 ">         
-              <InputNumber  v-model="readings" inputId="withoutgrouping" placeholder="Показания" :min="0"  :useGrouping="false" />
-            <Button @click="sendData" label="Передать" />
+
+      </div>
+      <div class="flex gap-3 items-center">
+        <p>Дата: </p>
+        <div class="">
+          <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+          <Tag v-else class="text-lg" severity="secondary"
+            :value="dayjs(counterUser?.dateLastCount).locale('ru').format('DD.MM.YY')"></Tag>
         </div>
-<h3 class="text-2xl mt-12">История показаний</h3>
-        <div class="card mt-1">
+
+      </div>
+      <div v-if="!pending" class="">
+        <div v-if="!iaNowMonth" class="">
+          <div class="mt-10 flex items-center gap-x-4">
+            <h4 class="flex-none font-semibold leading-6 text-indigo-600">Передать показания</h4>
+            <div class="h-px flex-auto bg-gray-100"></div>
+          </div>
+          <div class="flex gap-2 mt-3 ">
+            <InputNumber v-model="readings" inputId="withoutgrouping" :placeholder="counterUser?.lastCount.toString()"
+              :min="0" :useGrouping="false" />
+            <Button @click="sendData" :disabled="pending" label="Передать" />
+          </div>
+        </div>
+        <div v-else class="mt-10">
+          <InlineMessage severity="success">В этом месяце показания переданы</InlineMessage>
+        </div>
+      </div>
+
+
+
+
+
+      <h3 class="text-2xl mt-12">История показаний</h3>
+      <div class="card mt-1" v-if="pending">
+        <Skeleton width="100%" height="6rem"></Skeleton>
+        <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+        <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+      </div>
+      <div v-else class="card mt-1 ">
         <Accordion :activeIndex="0">
-            <AccordionTab v-for="tab in tabs" :key="tab.title" :header="tab.title">
-                <p class="m-0">Показания: {{ tab.count }}</p>
-                <p class="m-0">Дата: {{ tab.count }}</p>
-                <p class="m-0">К оплате: 230. Оплачено: {{ tab.count }}</p>
-                <p class="m-0">Оплачено за общие нужды: {{ tab.count }}</p>
-            </AccordionTab>
+          <AccordionTab v-for="data in dataMounth" :key="data.datePay"
+            :header="dayjs(data.dateCount).locale('ru').format('MMMM')">
+            <p class="m-0">Показания: {{ data.count }}</p>
+            <p class="m-0">Дата: {{ data.dateCount }} {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}</p>
+            <p class="m-0">К оплате: 230. Оплачено: {{ data.datePay }}</p>
+            <p class="m-0">Оплачено за общие нужды: {{ data.payOur }}</p>
+          </AccordionTab>
         </Accordion>
+      </div>
+
+
     </div>
 
-      
-    </div>
 
-
-</div>
-  </template>
+</div></template>
