@@ -4,7 +4,7 @@ import { default as jwt } from 'jsonwebtoken';
 
 
 
-export type UserModel = {
+export interface UserModel {
     id: number,
     name: string,
     surname: string,

@@ -1,6 +1,7 @@
 import { sql } from '~~/server/db'
+import type {UserModel} from '~~/server/model/user'
 
-export type ItemModel = {
+export interface ItemModel {
     year: string,
     month: string,
     count: number,
@@ -10,24 +11,34 @@ export type ItemModel = {
     datePay: number | null,
     isPay: boolean,
     payOur: number | null,
-    comment: string
+    comment: string,
+    differenceLastWater: number | null,
 }
 
 export type CounterModel = {
     id: number,
     id_user: number,
     items: ItemModel[],
-    lastCount: string,
+    lastCount: number,
+    dateLastCount: number,
+    comment: string   
+}
+
+export interface CounterModelAndMain extends Pick<UserModel, 'id' |  'street' | 'number'> {
+    id: number,
+    id_user: number,
+    items: ItemModel[],
+    lastCount: number,
     dateLastCount: number,
     comment: string   
 }
 
 
-export const read = async () => {
+export const read = async () => {   
     const result = await sql({
-        query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, p.id AS id_user FROM list c LEFT JOIN users p ON c.id_user = p.id'
+        query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, p.id AS id_user, p.street, p.number FROM list c LEFT JOIN users p ON c.id_user = p.id'
     })  
-    return result as CounterModel[]
+    return result as CounterModelAndMain[]
 }
 
 

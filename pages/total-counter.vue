@@ -36,19 +36,20 @@ const lastMonth = computed(() => data.value?.data[data.value?.data.length-1])
 </script>
 
 <template>
+
   <div class="container mx-auto">
   
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
 
 
 
-         <div v-if="!!!lastMonth?.count" class="">
+         <div v-if="!!!nowMonth?.count" class="">
             <div class="mt-10 flex items-center gap-x-4">
               <h4 class="flex-none font-semibold leading-6 text-indigo-600">Передать показания</h4>
               <div class="h-px flex-auto bg-gray-100"></div>
             </div>
             <div class="flex gap-2 mt-3 ">
-              <InputNumber v-model="readings" inputId="withoutgrouping" :placeholder="lastMonth?.lastCount.toString()"
+              <InputNumber v-model="readings" inputId="withoutgrouping" :placeholder="nowMonth?.lastCount.toString()"
                 :min="0" :useGrouping="false" />
               <Button @click="sendData" :disabled="pending" label="Передать" />
             </div>

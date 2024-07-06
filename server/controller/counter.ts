@@ -1,6 +1,7 @@
 import { H3Event } from 'h3'
 import dayjs from 'dayjs'
 import * as counterModel from '~~/server/model/counter'
+import * as adminModel from '~~/server/model/admin'
 import { default as jwt } from 'jsonwebtoken';
 import {SECRET} from '~~/server/secret'
 
@@ -15,19 +16,35 @@ const examinationToken = (token: string | undefined)=> {
   return decoderToken
 }
 
-export const read = async () => {
-    try {
-        const result = await counterModel.read()
+export const readForCounterDateAndMain = async (evt: H3Event) => {   
+    const query = getQuery(evt)
+    console.log(query)
+    if (query.month && query.year) {
+       try {
+              const result = await counterModel.read()             
+              result.forEach(el => {
+                  let newItems = el.items.filter(item => item.month == query.month && item.year == query.year)
+                  el.items = newItems
+              })
+           
+           const mainCounter = await adminModel.readForMonth({month:query.month.toString(), year:+query.year})         
+
         return {
-            data:result
+            data: result,
+            main:mainCounter
         }
     } catch {
         throw createError({
             statusCode: 500,
             statusMessage: 'Произошла ошибка при чтении...'
         })
+        }   
     }
-}
+     throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+     }
 
 //получить данные по счетчику по обоненту по токену
 export const userForToken = async (evt: H3Event) => {
@@ -94,9 +111,11 @@ export const create = async (evt: H3Event) => {
                 datePay: null,
                 isPay: false,
                 payOur: null,
-                comment: ''       
+                comment: '',
+                differenceLastWater: body.differenceLastWater
             }
 
+            //если юзер еще никогда не передавал показания
          if(findCounterFoIdUser.length ==0){            
              const result  = await counterModel.create({id_user:decoderToken.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: [item]})     
                
@@ -107,8 +126,9 @@ export const create = async (evt: H3Event) => {
          else {
 
           const newData =  findCounterFoIdUser[0].items.find(el => el.month == month && el.year == year)
-            // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month) 
+            // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month)
 
+             //проверка, если показания не пердавались в текущем месяце
           if(!newData){
             findCounterFoIdUser[0].items.push(item)
             const result  = await counterModel.updateCounterInAddMonthUser({id_user:decoderToken.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: findCounterFoIdUser[0].items})     

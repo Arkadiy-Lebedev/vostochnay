@@ -14,5 +14,10 @@ export const items = ref<IMenu[]>([
         label: 'Общий счетчик',
         icon: 'pi pi-star',
         link: '/total-counter'
-    }
+    },
+        {
+        label: 'Список',
+        icon: 'pi pi-star',
+        link: '/all-readings'
+    },
 ]);

@@ -1,7 +1,14 @@
 <script setup lang="ts">
+
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 
+
+/* TODO
+ * добавить topay сумму к оплате 
+ */
+
+//FIXME
 
 import type { CounterModel } from '~~/server/model/counter'
 
@@ -17,7 +24,7 @@ const dataMounth = computed(() => {
   return newArray.reverse()
 })
 
-const iaNowMonth = computed(() => {
+const isNowMonth = computed(() => {
   let status = false
   counterUser.value?.items.forEach(el => {
     if (el.month == dayjs().format('MMMM')) {
@@ -42,10 +49,18 @@ const { data, refresh, pending } = await useFetch('/api/counter/user', {
 
 
 const sendData = async () => {
+  if (!readings.value) { 
+    alert('показания должны быть заполнены')
+    return
+  } 
+ 
+  const differenceLastWater = readings.value - (counterUser.value ? counterUser.value?.lastCount : 0)
   const { error } = await useFetch('/api/counter/add', {
     method: 'POST',
     body: {
       lastCount: readings.value,
+      differenceLastWater: differenceLastWater
+      // добавить topay сумму к оплате
     },
     headers: {
       Authorization: String(tokenCookie.value),
@@ -59,6 +74,7 @@ const sendData = async () => {
 </script>
 
 <template>
+  {{ counterUser }}
   <div class="container mx-auto">
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
       <div class="flex gap-3 items-center">
@@ -81,7 +97,7 @@ const sendData = async () => {
 
       </div>
       <div v-if="!pending" class="">
-        <div v-if="!iaNowMonth" class="">
+        <div v-if="!isNowMonth" class="">
           <div class="mt-10 flex items-center gap-x-4">
             <h4 class="flex-none font-semibold leading-6 text-indigo-600">Передать показания</h4>
             <div class="h-px flex-auto bg-gray-100"></div>
@@ -112,7 +128,8 @@ const sendData = async () => {
           <AccordionTab v-for="data in dataMounth" :key="data.datePay"
             :header="dayjs(data.dateCount).locale('ru').format('MMMM')">
             <p class="m-0">Показания: {{ data.count }}</p>
-            <p class="m-0">Дата: {{ data.dateCount }} {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}</p>
+            <p class="m-0">Расход: {{ data.differenceLastWater }}</p>
+            <p class="m-0">Дата: {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}</p>
             <p class="m-0">К оплате: 230. Оплачено: {{ data.datePay }}</p>
             <p class="m-0">Оплачено за общие нужды: {{ data.payOur }}</p>
           </AccordionTab>
