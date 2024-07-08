@@ -10,6 +10,8 @@ export type ItemAdminModel = {
     waterHouses: number,
     lastCount: number,
     differenceLastWaterHouses: number,
+    differenceNowWaterHouses: number | null,
+    differenceToPay: number | null,
 }
 
 
@@ -27,7 +29,7 @@ export const readForMonth = async (data: Pick<ItemAdminModel, 'month' | 'year'>)
         query: 'SELECT * FROM main WHERE month=? AND year=?',
         values: [data.month, data.year]
     })  
-    return result as ItemAdminModel[]
+    return result as ItemAdminModel[] | []
 }
 
 

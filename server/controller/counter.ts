@@ -2,6 +2,7 @@ import { H3Event } from 'h3'
 import dayjs from 'dayjs'
 import * as counterModel from '~~/server/model/counter'
 import * as adminModel from '~~/server/model/admin'
+import * as settingsModel from '~~/server/model/settings'
 import { default as jwt } from 'jsonwebtoken';
 import {SECRET} from '~~/server/secret'
 
@@ -27,7 +28,8 @@ export const readForCounterDateAndMain = async (evt: H3Event) => {
                   el.items = newItems
               })
            
-           const mainCounter = await adminModel.readForMonth({month:query.month.toString(), year:+query.year})         
+           const mainCounter = await adminModel.readForMonth({ month: query.month.toString(), year: +query.year })      
+           
 
         return {
             data: result,
@@ -66,9 +68,21 @@ const decoderToken = examinationToken(token)
     console.log(decoderToken.role)
 
     try {
-          const result = await counterModel.readForId({id:decoderToken.id})       
+        const result = await counterModel.readForId({ id: decoderToken.id })   
+        const setting = await settingsModel.read()   
+        let difference = await readMainNowMonth()
+        if (difference.main && difference.main.length > 0) {           
+             return {
+                data: result,
+                setting: setting,
+                difference: difference.main[0].differenceNowWaterHouses,
+                differenceToPay: difference.main[0].differenceToPay
+            }
+        }
         return {
-            data:result
+            data: result,
+            setting: setting,
+            difference:null
         }
     } catch {
         throw createError({
@@ -106,7 +120,7 @@ export const create = async (evt: H3Event) => {
                 month: month,
                 count: body.lastCount,
                 dateCount: Date.now(),
-                toPay: null,
+                toPay: body.toPay,
                 pay: null,
                 datePay: null,
                 isPay: false,
@@ -152,3 +166,25 @@ export const create = async (evt: H3Event) => {
         })
     }
 }
+
+//получить перерасход за текущий месяц
+export const readMainNowMonth = async () => {   
+    const month = dayjs().format('MMMM')
+    const year = dayjs().format('YYYY') 
+    console.log(month)
+console.log(year)
+       try {
+           
+           const mainCounter = await adminModel.readForMonth({month:month.toString(), year:+year})         
+
+        return {            
+            main:mainCounter
+        }
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+        }    
+
+     }

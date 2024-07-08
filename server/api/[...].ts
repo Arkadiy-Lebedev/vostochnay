@@ -2,6 +2,7 @@ import { useBase, createRouter, defineEventHandler } from 'h3'
 import * as userCtrl from '~~/server/controller/user'
 import * as counterCtrl from '~~/server/controller/counter'
 import * as adminCtrl from '~~/server/controller/admin'
+import * as settingsCtrl from '~~/server/controller/settings'
 
 const router = createRouter()
 
@@ -15,5 +16,7 @@ router.post('/counter/add', defineEventHandler(counterCtrl.create))
 
 router.get('/admin/count', defineEventHandler(adminCtrl.read))
 router.put('/admin/count', defineEventHandler(adminCtrl.updateCounterGeneralMain))
+
+router.get('/settings', defineEventHandler(adminCtrl.read))
 
 export default useBase('/api', router.handler)

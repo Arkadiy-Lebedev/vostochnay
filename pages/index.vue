@@ -2,7 +2,8 @@
 
 import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
-
+import type { CounterModel } from '~~/server/model/counter'
+import type { ISettingsModel } from '~~/server/model/settings'
 
 /* TODO
  * добавить topay сумму к оплате 
@@ -10,13 +11,16 @@ import 'dayjs/locale/ru'
 
 //FIXME
 
-import type { CounterModel } from '~~/server/model/counter'
+
 
 
 console.log(dayjs().millisecond(1))
 
 const tokenCookie = useCookie('tokenUser')
 const counterUser = ref<CounterModel>()
+const settings = ref<ISettingsModel>()
+const difference = ref<number | null>(null)
+const differenceToPay = ref<number | null>(null)
 const readings = ref<number | null>(null)
 
 const dataMounth = computed(() => {
@@ -34,10 +38,18 @@ const isNowMonth = computed(() => {
   return status
 })
 
+const findNowMonth = computed(() => {
+  return counterUser.value?.items.find(el => el.month == dayjs().format('MMMM') && el.year == dayjs().format('YYYY'))  
+})
+
 
 const { data, refresh, pending } = await useFetch('/api/counter/user', {
   onResponse({ response }) {
+
     counterUser.value = response._data.data[0]
+    settings.value = response._data.setting[0]
+    difference.value = response._data.difference
+    differenceToPay.value = response._data.differenceToPay
     console.log(response._data.data)
   },
   headers: {
@@ -48,19 +60,24 @@ const { data, refresh, pending } = await useFetch('/api/counter/user', {
 
 
 
+
+
+
 const sendData = async () => {
-  if (!readings.value) { 
+  if (!readings.value) {
     alert('показания должны быть заполнены')
     return
-  } 
- 
+  }
+
   const differenceLastWater = readings.value - (counterUser.value ? counterUser.value?.lastCount : 0)
+  const toPay = differenceLastWater * (settings.value?.price ? settings.value?.price : 0)
+    
   const { error } = await useFetch('/api/counter/add', {
     method: 'POST',
     body: {
       lastCount: readings.value,
-      differenceLastWater: differenceLastWater
-      // добавить topay сумму к оплате
+      differenceLastWater: differenceLastWater,
+      toPay: toPay
     },
     headers: {
       Authorization: String(tokenCookie.value),
@@ -71,31 +88,90 @@ const sendData = async () => {
 
 
 
+
+
 </script>
 
 <template>
-  {{ counterUser }}
+
   <div class="container mx-auto">
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
-      <div class="flex gap-3 items-center">
-        <p>Последние показания: </p>
-        <div class="">
+      <div class="flex flex-row-reverse  justify-between">
+        <div class="w-96 ">
+          <Panel header="Общая информация:">
+            <div class="flex gap-3 items-center mb-3">
+              <p>Стоимость 1 куб.м.: </p>
+              <div class="">
+                <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+                <Tag v-else class="text-lg" severity="Info" :value="settings?.price + ' руб.'"></Tag>
+              </div>
+            </div>
+            <div v-if="difference">
+              <div class="flex gap-3 items-center mb-3">
+                <p>Общий перерасход: </p>
+                <div class="">
+                  <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+                  <Tag v-else class="text-lg" severity="secondary" :value="difference + ' куб.м.'"></Tag>
+                </div>
 
-          <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-          <Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'"></Tag>
+              </div>
+              <div class="flex gap-3 items-center mb-3">
+                <p>К оплате за месяц: </p>
+                <div class="">
+                  <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+                  <Tag v-else class="text-lg" severity="secondary" :value="differenceToPay + ' руб.'"></Tag>
+                </div>
+
+              </div>
+            </div>
+
+          </Panel>
+        </div>
+
+        <div class="">
+          <div class="flex gap-3 items-center mb-3">
+            <p>Последние переданные показания: </p>
+            <div class="">
+
+              <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+              <Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'"></Tag>
+            </div>
+
+
+          </div>
+          <div class="flex gap-3 items-center mb-3">
+            <p>Дата: </p>
+            <div class="">
+              <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+              <Tag v-else class="text-lg" severity="secondary"
+                :value="dayjs(counterUser?.dateLastCount).locale('ru').format('DD.MM.YY')"></Tag>
+            </div>
+
+          </div>
+          <div class="flex gap-3 items-center mb-3">
+                <p>Расход за месяц: </p>
+                <div class="">
+                  <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+                  <Tag v-else class="text-lg" severity="secondary"
+                    :value="findNowMonth?.differenceLastWater + ' куб.м.'"></Tag>
+                </div>
+
+              </div>
+          <div class="flex gap-3 items-center mb-3">
+              <p>К оплате: </p>
+              <div class="">
+                <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+                <Tag v-else class="text-lg" severity="secondary"
+                  :value="findNowMonth?.toPay + ' руб.'"></Tag>
+              </div>
+
+            </div>
+
         </div>
 
 
       </div>
-      <div class="flex gap-3 items-center">
-        <p>Дата: </p>
-        <div class="">
-          <Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-          <Tag v-else class="text-lg" severity="secondary"
-            :value="dayjs(counterUser?.dateLastCount).locale('ru').format('DD.MM.YY')"></Tag>
-        </div>
 
-      </div>
       <div v-if="!pending" class="">
         <div v-if="!isNowMonth" class="">
           <div class="mt-10 flex items-center gap-x-4">
@@ -113,10 +189,6 @@ const sendData = async () => {
         </div>
       </div>
 
-
-
-
-
       <h3 class="text-2xl mt-12">История показаний</h3>
       <div class="card mt-1" v-if="pending">
         <Skeleton width="100%" height="6rem"></Skeleton>
@@ -127,10 +199,10 @@ const sendData = async () => {
         <Accordion :activeIndex="0">
           <AccordionTab v-for="data in dataMounth" :key="data.datePay"
             :header="dayjs(data.dateCount).locale('ru').format('MMMM')">
-            <p class="m-0">Показания: {{ data.count }}</p>
-            <p class="m-0">Расход: {{ data.differenceLastWater }}</p>
+            <p class="m-0">Показания: {{ data.count }} куб.м.</p>
+            <p class="m-0">Расход: {{ data.differenceLastWater }} куб.м.</p>
             <p class="m-0">Дата: {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}</p>
-            <p class="m-0">К оплате: 230. Оплачено: {{ data.datePay }}</p>
+            <p class="m-0">К оплате: {{ data.toPay }} руб. Оплачено: {{ data.datePay }} руб.</p>
             <p class="m-0">Оплачено за общие нужды: {{ data.payOur }}</p>
           </AccordionTab>
         </Accordion>
@@ -140,4 +212,5 @@ const sendData = async () => {
     </div>
 
 
-</div></template>
+  </div>
+</template>
