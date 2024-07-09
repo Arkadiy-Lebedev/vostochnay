@@ -21,7 +21,10 @@ export const read = async () => {
 export const updateCounterGeneralMain = async (evt: H3Event) => {
     const token = getHeaders(evt).authorization
 
+    /*TODO:
 //вставить обратоку токена на роль администратор
+*/
+
 
     const body = await readBody(evt) 
     console.log(body)
@@ -41,6 +44,45 @@ export const updateCounterGeneralMain = async (evt: H3Event) => {
         const result = await adminModel.updateCounterGeneralMain({ count: body.count, date: Date.now(), month: month, year:+year })
         return {
             data:result
+        }
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+    }
+}
+
+
+
+export const closeMonthMain = async (evt: H3Event) => {
+    const token = getHeaders(evt).authorization
+
+    /*TODO:
+//вставить обратоку токена на роль администратор
+*/
+
+    const body = await readBody(evt) 
+    console.log(body)
+
+        if(!body.count){
+    throw createError({
+        statusCode: 500,
+        statusMessage: 'Не верные показания.'
+    })
+    }
+
+    const month = dayjs().add(1, 'month').format('MMMM')
+    const year = dayjs().format('YYYY')
+    
+
+    try {
+        const create = await adminModel.createCounter({ month:month, year:+year, lastCount: body.count, differenceLastWaterHouses:body.nowMonthDifferenceWaterHouses })
+        const resultUpdate = await adminModel.updateCounterInCloseMonth({ waterHouses: body.waterHouse, differenceNowWaterHouses:body.nowMonthDifferenceWaterHouses,  
+            differenceToPay:body.differenceToPay, id:body.id})
+        return {
+            data:create,
+            rep:resultUpdate
         }
     } catch {
         throw createError({

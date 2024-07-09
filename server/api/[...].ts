@@ -16,6 +16,7 @@ router.post('/counter/add', defineEventHandler(counterCtrl.create))
 
 router.get('/admin/count', defineEventHandler(adminCtrl.read))
 router.put('/admin/count', defineEventHandler(adminCtrl.updateCounterGeneralMain))
+router.post('/admin/count/create', defineEventHandler(adminCtrl.closeMonthMain))
 
 router.get('/settings', defineEventHandler(adminCtrl.read))
 

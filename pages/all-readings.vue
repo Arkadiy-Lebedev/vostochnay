@@ -9,7 +9,7 @@ console.log(dayjs().millisecond(1))
 
 /*TODO:
 * при закрытии месяца нужно создават следующий месяц в базе куда передапть count в поле lastcount 
-и nowMonthDifferenceLastWaterHouses- перерасход в текущем месяце в differenceLastWaterHouses
+и nowMonthDifferenceWaterHouses- перерасход в текущем месяце в differenceLastWaterHouses
 
 */
 
@@ -23,7 +23,10 @@ const year = computed(() => {
 })
 
 
-const { data, refresh, pending } = await useFetch<{ data: CounterModelAndMain[], main: ItemAdminModel[] }>('/api/counter/all-read', {  
+const { data, refresh, pending } = await useFetch<{ data: CounterModelAndMain[], main: ItemAdminModel[], setting: {
+      "id": number,
+      "price": number
+    }[] }>('/api/counter/all-read', {  
     query: { month: month, year: year },
   // headers: {
   //   Authorization: String(tokenCookie.value),
@@ -32,23 +35,59 @@ const { data, refresh, pending } = await useFetch<{ data: CounterModelAndMain[],
 
 })
 
-const listUserDuty = computed(() => {
-  
+const calculateMonth = async ()=> {
+const waterHouse = data.value?.data.reduce( (accumulator, el) => {
+if(el.items.length>0 && el.items[0].differenceLastWater){
+  return accumulator + el.items[0].differenceLastWater;
+}   else{
+  return accumulator
+}
+}, 0);
+
+const differenceWater = data.value ? (data.value?.main[0].count - data.value?.main[0].lastCount - ((waterHouse?waterHouse:0) + (data.value?.main[0].differenceLastWaterHouses))) : 0
+
+  const { error } = await useFetch('/api/admin/count/create', {
+    method: 'POST',
+    body: {
+      id:data.value?.main[0].id,
+      waterHouse: waterHouse,
+      count:data.value?.main[0].count,
+      nowMonthDifferenceWaterHouses:differenceWater,
+      differenceToPay: differenceWater * (data.value ? data.value?.setting[0].price : 0)
+    },
+    // headers: {
+    //   Authorization: String(tokenCookie.value),
+    // }
+  })
+  refresh()
+}
+
+
+
+const listUserDuty = computed(() => {  
   const newArray = data.value?.data.map(el => {
-    if (el.items.filter(item => item.isPay == false || item.payOur == null).length > 0) {
-      
+    if (el.items.filter(item => item.isPay == false || item.payOur == null).length > 0) {      
         return el
     } else {
       return 
     }  
   })
-  
+  return newArray?.filter(el => el != null)
+})
 
+const listUserGetCount = computed(() => {  
+  const newArray = data.value?.data.map(el => {
+    if (el.items.length == 0) {      
+        return el
+    } else {
+      return 
+    }  
+  })  
   return newArray?.filter(el => el != null)
 })
 
 
-const nowMonthDifferenceLastWaterHouses = computed(() => data.value ? data.value?.main[0].count - data.value?.main[0].lastCount - (data.value?.main[0].waterHouses + data.value?.main[0].differenceLastWaterHouses) : 0)
+const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.main[0].count - data.value?.main[0].lastCount - (data.value?.main[0].waterHouses + data.value?.main[0].differenceLastWaterHouses)) : 0)
 
 
 </script>
@@ -67,34 +106,40 @@ const nowMonthDifferenceLastWaterHouses = computed(() => data.value ? data.value
     <div class="mt-6 border-t border-gray-100">
       <dl class="divide-y divide-gray-100">
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <dt class="text-sm font-medium leading-6 text-gray-900">Общие показания</dt>
-          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{data?.main[0].count}} куб.м. / {{ dayjs(data?.main[0].date).locale('ru').format('DD.MM.YY') }}</dd>
+          <dt class=" font-medium leading-6 text-gray-900">Общие показания</dt>
+          <dd class="mt-1  leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{data?.main[0].count}} куб.м. / {{ dayjs(data?.main[0].date).locale('ru').format('DD.MM.YY') }}</dd>
         </div>
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <dt class="text-sm font-medium leading-6 text-gray-900">Предыдущие показания</dt>
-          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ data?.main[0].lastCount }} куб.м.</dd>
+          <dt class="   font-medium leading-6 text-gray-900">Предыдущие показания</dt>
+          <dd class="mt-1  leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ data?.main[0].lastCount }} куб.м.</dd>
         </div>
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <dt class="text-sm font-medium leading-6 text-gray-900">Расход</dt>
-          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ (data?.main[0].count ? data?.main[0].count : 0) - (data?.main[0].lastCount ? data?.main[0].lastCount : 0) }} куб.м.</dd>
+          <dt class="   font-medium leading-6 text-gray-900">Расход</dt>
+          <dd class="mt-1  leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ (data?.main[0].count ? data?.main[0].count : 0) - (data?.main[0].lastCount ? data?.main[0].lastCount : 0) }} куб.м.</dd>
         </div>
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <dt class="text-sm font-medium leading-6 text-gray-900">Расход с домов</dt>
-          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ data?.main[0].waterHouses }}</dd>
+          <dt class="   font-medium leading-6 text-gray-900">Расход с домов</dt>
+          <dd class="mt-1  leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ data?.main[0].waterHouses }}</dd>
         </div>
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
-          <dt class="text-sm font-medium leading-6 text-gray-900">Перерасход/утечка <br/> <span class="mt-1 max-w-2xl text-xs leading-none text-gray-500">(С учетом оплаченного перерасхода с прошлого месяца {{ data?.main[0].differenceLastWaterHouses }} куб.м.)</span> </dt>
-          <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ nowMonthDifferenceLastWaterHouses }} куб.м.</dd>
+          <dt class="   font-medium leading-6 text-gray-900">Перерасход/утечка <br/> <span class="mt-1 max-w-2xl text-xs leading-none text-gray-500">(С учетом оплаченного перерасхода с прошлого месяца {{ data?.main[0].differenceLastWaterHouses }} куб.м.)</span> </dt>
+          <dd class="mt-1 leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ nowMonthDifferenceWaterHouses }} куб.м.</dd>
         </div>
       </dl>
     </div>
   </div>
+  <div v-else class="col-span-2 mt-10">   
+    <InlineMessage severity="warn"> Данные не найдены</InlineMessage>
+  </div>
 
   <div class="p-7  ">  
+
     <div class="p-7 border-2 border-indigo-200 rounded-2xl">
-<p class=" text-base font-semibold leading-7 text-gray-900 ">Не олпатили:  {{ listUserDuty?.length }} человек</p> 
+     
+          <Button v-if="!data?.main[0] || !data?.main[0].waterHouses" @click="calculateMonth" label="Рассчитать месяц" icon="pi pi-check"  :disabled="(listUserGetCount ? listUserGetCount?.length : 0) > 0"/>
+<p class=" text-base font-semibold leading-7 text-gray-900 mt-10 ">Не оплатили:  {{ listUserDuty?.length }} человек</p> 
   <div class="mt-2" v-for="data in listUserDuty" :key="data?.id" >
-    <Tag severity="warning" value="Warning"> {{ data?.street }} </Tag>
+    <Tag severity="warning" value="Warning"> {{ data?.street + ' д. ' + data?.number }} </Tag>
   </div>
     </div> 
    

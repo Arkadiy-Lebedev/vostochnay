@@ -29,11 +29,12 @@ export const readForCounterDateAndMain = async (evt: H3Event) => {
               })
            
            const mainCounter = await adminModel.readForMonth({ month: query.month.toString(), year: +query.year })      
-           
+           const setting = await settingsModel.read()   
 
         return {
             data: result,
-            main:mainCounter
+            main:mainCounter,
+            setting:setting
         }
     } catch {
         throw createError({

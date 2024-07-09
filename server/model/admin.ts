@@ -43,3 +43,24 @@ export const updateCounterGeneralMain = async (data: Pick<ItemAdminModel, 'count
     return result.length === 1 ? result[0] as ItemAdminModel : null
 }
 
+export const createCounter = async (data: Pick<ItemAdminModel,'month' | 'year' | 'lastCount' | 'differenceLastWaterHouses'>) => {   
+    console.log("данные create", data)
+    const result = await sql({
+        query: 'INSERT INTO main ( month, year, lastCount, differenceLastWaterHouses) VALUES (?, ?, ?, ?)',
+        values: [data.month, data.year, data.lastCount, data.differenceLastWaterHouses]
+    }) as any
+
+    return result.length === 1 ? result[0] as ItemAdminModel : null
+}
+
+
+export const updateCounterInCloseMonth = async (data: Pick<ItemAdminModel, 'waterHouses' | 'differenceNowWaterHouses' | 'differenceToPay' |  'id' >) => {   
+    console.log("данные", data)
+    const result = await sql({
+        query: 'UPDATE main SET waterHouses = ?, differenceNowWaterHouses =?, differenceToPay =?  WHERE id=?',
+        values: [data.waterHouses, data.differenceNowWaterHouses, data.differenceToPay, data.id]
+    }) as any
+
+    return result.length === 1 ? result[0] as ItemAdminModel : null
+}
+
