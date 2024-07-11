@@ -14,6 +14,8 @@ console.log(dayjs().millisecond(1))
 */
 
 const date = ref();
+const isDialog = ref(false);
+const enterUser = ref<CounterModelAndMain | null>(null);
 
 const month = computed(() => {  
  return dayjs(date.value).format('MMMM')
@@ -90,6 +92,22 @@ const listUserGetCount = computed(() => {
 const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.main[0].count - data.value?.main[0].lastCount - (data.value?.main[0].waterHouses + data.value?.main[0].differenceLastWaterHouses)) : 0)
 
 
+const setUser = (id: number) => {
+  console.log(id)
+  isDialog.value = true
+  const user = data.value?.data.find(el => el.id == id)
+  if(user){
+    enterUser.value = user
+  } else {
+    enterUser.value = null
+  }
+  
+}
+
+const closeModal = () => {
+  console.log(456)
+}
+
 </script>
 
 <template>
@@ -153,7 +171,8 @@ const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.m
    <DataTable :value="data?.data" tableStyle="min-width: 50rem">      
               <Column header="Адрес">
                   <template #body="slotProps">
-              {{ slotProps.data.street }} {{ slotProps.data.number }}
+                    <p @click="setUser(slotProps.data.id)" class="">  {{ slotProps.data.street }} {{ slotProps.data.number }}</p>
+            
                   </template>
               </Column>
               <Column header="Расход" >
@@ -185,6 +204,13 @@ const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.m
 
 </div>
 </div>
+
+<div class="card flex justify-center">
+        
+        <Dialog v-model:visible="isDialog" modal :header="enterUser?.street + ' ' + enterUser?.number" :style="{ width: '25rem' }">
+    <Formpay :user="enterUser" @closeModal="isDialog= false"></Formpay>
+        </Dialog>
+    </div>
 </template>
 
 <style>
