@@ -4,7 +4,7 @@ import 'dayjs/locale/ru'
 
 import type { CounterModelAndMain } from '~~/server/model/counter'
 import type { ItemAdminModel } from '~~/server/model/admin'
-
+import type { ISettingsModel } from '~~/server/model/settings'
 console.log(dayjs().millisecond(1))
 
 /*TODO:
@@ -25,10 +25,7 @@ const year = computed(() => {
 })
 
 
-const { data, refresh, pending } = await useFetch<{ data: CounterModelAndMain[], main: ItemAdminModel[], setting: {
-      "id": number,
-      "price": number
-    }[] }>('/api/counter/all-read', {  
+const { data, refresh, pending } = await useFetch<{ data: CounterModelAndMain[], main: ItemAdminModel[], setting: ISettingsModel[] }>('/api/counter/all-read', {  
     query: { month: month, year: year },
   // headers: {
   //   Authorization: String(tokenCookie.value),
@@ -55,7 +52,7 @@ const differenceWater = data.value ? (data.value?.main[0].count - data.value?.ma
       waterHouse: waterHouse,
       count:data.value?.main[0].count,
       nowMonthDifferenceWaterHouses:differenceWater,
-      differenceToPay: differenceWater * (data.value ? data.value?.setting[0].price : 0)
+      differenceToPay: differenceWater * (data.value?.setting[0].price ? data.value?.setting[0].price : 0)
     },
     // headers: {
     //   Authorization: String(tokenCookie.value),
@@ -89,8 +86,19 @@ const listUserGetCount = computed(() => {
 })
 
 
-const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.main[0].count - data.value?.main[0].lastCount - (data.value?.main[0].waterHouses + data.value?.main[0].differenceLastWaterHouses)) : 0)
+// const nowMonthDifferenceWaterHouses = computed(() => data.value ? (data.value?.main[0].count - data.value?.main[0].lastCount - (data.value?.main[0].waterHouses + data.value?.main[0].differenceLastWaterHouses)) : 0)
+const differencePaySingleHouse =  computed(() =>{
+  if( data.value && data.value?.main[0].differenceNowWaterHouses){
+    return (data.value?.main[0].differenceNowWaterHouses / (data.value.setting[0].houses - data.value.setting[0].exclude)).toFixed(2)
+  }
+  else {
+    return null
+  }
+})
+  
 
+
+// data.value?.main[0].differenceNowWaterHouses ? data.value?.main[0].differenceNowWaterHouses : 0) / (data.value.setting[0].houses - data.value.setting[0].exclude))
 
 const setUser = (id: number) => {
   console.log(id)
@@ -104,9 +112,13 @@ const setUser = (id: number) => {
   
 }
 
-const closeModal = () => {
-  console.log(456)
+
+
+const refreshData = () => {
+  isDialog.value= false
+  refresh()
 }
+
 
 </script>
 
@@ -141,7 +153,11 @@ const closeModal = () => {
         </div>
         <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
           <dt class="   font-medium leading-6 text-gray-900">Перерасход/утечка <br/> <span class="mt-1 max-w-2xl text-xs leading-none text-gray-500">(С учетом оплаченного перерасхода с прошлого месяца {{ data?.main[0].differenceLastWaterHouses }} куб.м.)</span> </dt>
-          <dd class="mt-1 leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ nowMonthDifferenceWaterHouses }} куб.м.</dd>
+          <dd class="mt-1 leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ data.main[0].differenceNowWaterHouses }} куб.м.</dd>
+        </div>
+        <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+          <dt class="   font-medium leading-6 text-gray-900">Оплата с каждого дома: <br/> </dt>
+          <dd class="mt-1 leading-6 text-gray-700 sm:col-span-2 sm:mt-0">{{ differencePaySingleHouse }} руб.</dd>
         </div>
       </dl>
     </div>
@@ -208,7 +224,7 @@ const closeModal = () => {
 <div class="card flex justify-center">
         
         <Dialog v-model:visible="isDialog" modal :header="enterUser?.street + ' ' + enterUser?.number" :style="{ width: '25rem' }">
-    <Formpay :user="enterUser" @closeModal="isDialog= false"></Formpay>
+    <Formpay :user="enterUser" @closeModal="isDialog= false" :difference="differencePaySingleHouse" @refresh="refreshData"></Formpay>
         </Dialog>
     </div>
 </template>

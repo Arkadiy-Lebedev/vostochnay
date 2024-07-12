@@ -3,7 +3,9 @@ import { sql } from '~~/server/db'
 
 export interface ISettingsModel {
     id: number,
-    price: number | null   
+    price: number | null,
+    houses: number,
+    exclude: number
 }
 
 

@@ -189,3 +189,57 @@ console.log(year)
         }    
 
      }
+
+
+     export const updateDataToPayForAdmin = async (evt: H3Event) => {
+
+        const bodyData = await readBody(evt) 
+        const body = bodyData.data
+        console.log("боди",body)
+
+        //  const token = getHeaders(evt).authorization
+        //  const decoderToken = examinationToken(token)
+
+         /*TODO:
+* проверить токен что это администратор
+*/
+
+
+try {   
+
+    const findCounterFoIdUser = await counterModel.readForId({ id: body.id }) 
+
+ console.log(findCounterFoIdUser)
+      let newData =  findCounterFoIdUser[0].items.find(el => el.month == body.month && el.year == body.year)
+      let newItems =  findCounterFoIdUser[0].items.filter(el => el.month != body.month && el.year != body.year)
+        // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month)
+       console.log(newData)
+         //проверка, если показания не пердавались в текущем месяце
+      if(newData){
+        newData.pay = body.pay
+        newData.comment = body.comment
+        newData.payOur = body.outPay
+        newData.isPay = body.isPay
+        
+        newItems.push(newData)
+        
+        const result  = await counterModel.updateDataToPayForAdmin({items: newItems, id_user:body.id})     
+         return{
+            data:result
+         }      
+    }
+   
+   
+     }
+
+
+ catch {
+    throw createError({
+        statusCode: 500,
+        statusMessage: 'Произошла ошибка ...'
+    })
+}
+
+
+
+     }

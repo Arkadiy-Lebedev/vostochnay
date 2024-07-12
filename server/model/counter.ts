@@ -79,3 +79,15 @@ export const updateCounterInAddMonthUser = async (data: Pick<CounterModel, 'item
 
     return result.length === 1 ? result[0] as CounterModel : null
 }
+
+// jобновление оплаты пользовталея администратором
+export const updateDataToPayForAdmin = async (data: Pick<CounterModel, 'items' |  'id_user' >) => {   
+    console.log("дата",data)
+    
+    const result = await sql({
+        query: 'UPDATE list SET items = ? WHERE id_user=?',
+        values: [ JSON.stringify(data.items),  data.id_user]
+    }) as any
+
+    return result.length === 1 ? result[0] as CounterModel : null
+}
