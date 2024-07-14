@@ -8,7 +8,9 @@ import type { ILoginUser, IUser } from '@/types/user.types'
 import type { IError } from '@/types/helper.types'
 
    const {userInfo} = useUserStore()
-   const tokenCookie = useCookie('tokenUser')
+   const tokenCookie = useCookie('tokenUser', {
+  maxAge: 2592000*12, // 30 days in seconds
+})
 
 
 const user = reactive<ILoginUser>({

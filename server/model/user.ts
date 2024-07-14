@@ -13,7 +13,8 @@ export interface UserModel {
     number: string,
     phone: string,
     role: string,
-    password: string
+    password: string,
+    dateCreated: string,
 }
 
 
@@ -35,7 +36,7 @@ export const readOneForReginPhone = async (data: Pick<UserModel, 'phone'>) => {
     })
     return result as UserModel[]
 }
-
+// ищем пользователя по улице
 export const userOneForReginStreet = async (data: Pick<UserModel, 'street' | 'number'>) => {   
    console.log(data)
     const result = await sql({
@@ -51,9 +52,19 @@ export const userOneForReginStreet = async (data: Pick<UserModel, 'street' | 'nu
 export const create = async (data: Pick<UserModel, 'name' | 'surname' | 'family' | 'street' | 'number' | 'phone' | 'password'>) => {
     console.log(data)
     const result = await sql({
-        query: 'INSERT INTO users( name, surname, family, street, number, phone, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        values: [data.name, data.surname, data.family, data.street, data.number, data.phone, data.password, 'user']
+        query: 'INSERT INTO users( name, surname, family, street, number, phone, password, role, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        values: [data.name, data.surname, data.family, data.street, data.number, data.phone, data.password, 'user', Date.now()]
     }) as any
     console.log('результат', result)
     return result
+}
+
+// ищем пользовтаеля по id
+export const readUserForId = async (data: Pick<UserModel, 'id'>) => {   
+
+    const result = await sql({
+        query: 'SELECT id, name, surname, family, street, number, phone, role FROM users WHERE id = ? ',
+        values: [data.id]
+    })
+    return result as UserModel[]
 }

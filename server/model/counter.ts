@@ -11,6 +11,7 @@ export interface ItemModel {
     datePay: number | null,
     isPay: boolean,
     payOur: number | null,
+    isOurPay: boolean,
     comment: string,
     differenceLastWater: number | null,
 }
@@ -18,27 +19,43 @@ export interface ItemModel {
 export type CounterModel = {
     id: number,
     id_user: number,
-    items: ItemModel[],
+    items: ItemModel[] | [],
     lastCount: number,
     dateLastCount: number,
-    comment: string   
+    comment: string,
+    startCount: number,
 }
 
 export interface CounterModelAndMain extends Pick<UserModel, 'id' |  'street' | 'number'> {
     id: number,
     id_user: number,
-    items: ItemModel[],
+    items: ItemModel[] | [],
     lastCount: number,
     dateLastCount: number,
     comment: string   
 }
 
+export interface CounterModelAndMainAdmin extends Pick<UserModel, 'id' |  'street' | 'number' | 'name' | 'surname' | 'family' | 'phone'> {
+    id: number,
+    id_user: number,
+    items: ItemModel[],
+    lastCount: number,
+    dateLastCount: number,
+    comment: string,
+}
 
 export const read = async () => {   
     const result = await sql({
         query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, p.id AS id_user, p.street, p.number FROM list c LEFT JOIN users p ON c.id_user = p.id'
     })  
     return result as CounterModelAndMain[]
+}
+
+export const readForAdmin = async () => {   
+    const result = await sql({
+        query: 'SELECT  c.id, c.items, c.lastCount, c.dateLastCount, c.comment, p.id AS id_user, p.street, p.number, p.name, p.surname, p.family, p.phone FROM list c LEFT JOIN users p ON c.id_user = p.id'
+    })  
+    return result as CounterModelAndMainAdmin[]
 }
 
 
@@ -87,6 +104,17 @@ export const updateDataToPayForAdmin = async (data: Pick<CounterModel, 'items' |
     const result = await sql({
         query: 'UPDATE list SET items = ? WHERE id_user=?',
         values: [ JSON.stringify(data.items),  data.id_user]
+    }) as any
+
+    return result.length === 1 ? result[0] as CounterModel : null
+}
+
+// добавление стартового  показания счетчика  и создания пользователя в лсите 
+export const startCount = async (data: Pick<CounterModel, 'id_user' | 'lastCount' | 'dateLastCount' | 'startCount'>) => {
+console.log("дата",data)
+    const result = await sql({
+        query: 'INSERT INTO list  (id_user, items, lastCount, dateLastCount, startCount)  VALUES (?, ?, ?, ?, ?)',
+        values: [data.id_user, JSON.stringify([]), data.lastCount, data.dateLastCount, data.startCount]
     }) as any
 
     return result.length === 1 ? result[0] as CounterModel : null

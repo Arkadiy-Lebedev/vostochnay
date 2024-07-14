@@ -3,19 +3,8 @@ import dayjs from 'dayjs'
 import * as counterModel from '~~/server/model/counter'
 import * as adminModel from '~~/server/model/admin'
 import * as settingsModel from '~~/server/model/settings'
-import { default as jwt } from 'jsonwebtoken';
-import {SECRET} from '~~/server/secret'
-
-const examinationToken = (token: string | undefined)=> {
-    const decoderToken = token ? jwt.verify(token, SECRET) : null
-    if (!decoderToken || typeof decoderToken === 'string') {
-      throw createError({
-            statusCode: 500,
-            statusMessage: 'Ошибка токена'
-        })
-  }
-  return decoderToken
-}
+import { examinationToken } from '~~/server/helpers/helpers'
+import type { CounterModel as cc } from '~~/server/model/counter'
 
 export const readForCounterDateAndMain = async (evt: H3Event) => {   
     const query = getQuery(evt)
@@ -47,7 +36,42 @@ export const readForCounterDateAndMain = async (evt: H3Event) => {
             statusCode: 500,
             statusMessage: 'Произошла ошибка при чтении...'
         })
+}
+     
+// получить данные оснвоаные для админа
+
+export const readForCounterDateAndMainAdmin = async (evt: H3Event) => {   
+    const query = getQuery(evt)
+    console.log(query)
+    if (query.month && query.year) {
+       try {
+              const result = await counterModel.readForAdmin()             
+              result.forEach(el => {
+                  let newItems = el.items.filter(item => item.month == query.month && item.year == query.year)
+                  el.items = newItems
+              })
+           
+           const mainCounter = await adminModel.readForMonth({ month: query.month.toString(), year: +query.year })      
+           const setting = await settingsModel.read()   
+
+        return {
+            data: result,
+            main:mainCounter,
+            setting:setting
+        }
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+        }   
+    }
+     throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
      }
+
 
 //получить данные по счетчику по обоненту по токену
 export const userForToken = async (evt: H3Event) => {
@@ -65,8 +89,6 @@ export const userForToken = async (evt: H3Event) => {
 
 const decoderToken = examinationToken(token)
 
-    console.log(decoderToken.id)
-    console.log(decoderToken.role)
 
     try {
         const result = await counterModel.readForId({ id: decoderToken.id })   
@@ -77,7 +99,9 @@ const decoderToken = examinationToken(token)
                 data: result,
                 setting: setting,
                 difference: difference.main[0].differenceNowWaterHouses,
-                differenceToPay: difference.main[0].differenceToPay
+                 differenceToPay: difference.main[0].differenceToPay,
+                 expenses: difference.main[0].expenses,
+                commentExpenses: difference.main[0].commentExpenses
             }
         }
         return {
@@ -112,11 +136,12 @@ export const create = async (evt: H3Event) => {
         const decoderToken = examinationToken(token)
 
         const findCounterFoIdUser = await counterModel.readForId({ id: decoderToken.id }) 
-    
+     const newArr = [...findCounterFoIdUser[0].items]
 
          const month = dayjs().format('MMMM')
         const year = dayjs().format('YYYY')
-         const item = {               
+            const item = {  
+           
                 year: year,
                 month: month,
                 count: body.lastCount,
@@ -125,13 +150,14 @@ export const create = async (evt: H3Event) => {
                 pay: null,
                 datePay: null,
                 isPay: false,
+                isOurPay: false,
                 payOur: null,
                 comment: '',
                 differenceLastWater: body.differenceLastWater
             }
 
             //если юзер еще никогда не передавал показания
-         if(findCounterFoIdUser.length ==0){            
+         if(!findCounterFoIdUser[0]){            
              const result  = await counterModel.create({id_user:decoderToken.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: [item]})     
                
              return {
@@ -144,8 +170,9 @@ export const create = async (evt: H3Event) => {
             // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month)
 
              //проверка, если показания не пердавались в текущем месяце
-          if(!newData){
-            findCounterFoIdUser[0].items.push(item)
+             if (!newData) {
+              newArr.push(item)
+            findCounterFoIdUser[0].items = newArr
             const result  = await counterModel.updateCounterInAddMonthUser({id_user:decoderToken.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: findCounterFoIdUser[0].items})     
              return{
                 data:result
@@ -197,12 +224,15 @@ console.log(year)
         const body = bodyData.data
         console.log("боди",body)
 
-        //  const token = getHeaders(evt).authorization
-        //  const decoderToken = examinationToken(token)
+         const token = getHeaders(evt).authorization
+         const decoderToken = examinationToken(token)
 
-         /*TODO:
-* проверить токен что это администратор
-*/
+         if (decoderToken.role != "admin") {
+                 throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка прав доступа ...'
+            })
+         }
 
 
 try {   
@@ -220,7 +250,7 @@ try {
         newData.comment = body.comment
         newData.payOur = body.outPay
         newData.isPay = body.isPay
-        
+        newData.isOurPay = body.isOurPay
         newItems.push(newData)
         
         const result  = await counterModel.updateDataToPayForAdmin({items: newItems, id_user:body.id})     

@@ -16,6 +16,7 @@ export interface IbaseUser {
 export interface IUserLogin extends IbaseUser {
     password: string | null,
     repeatPassword: string | null,
+    startCount: number | null,
 }
 
 export interface IUser extends IbaseUser {

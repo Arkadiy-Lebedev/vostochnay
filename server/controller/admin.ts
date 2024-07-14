@@ -1,8 +1,9 @@
 import { H3Event } from 'h3'
 import dayjs from 'dayjs'
 import * as adminModel from '~~/server/model/admin'
+import { examinationToken } from '~~/server/helpers/helpers'
 
-
+// получить список все показания главного счетчика
 export const read = async () => {
     
     try {
@@ -18,12 +19,19 @@ export const read = async () => {
     }
 }
 
+//передача показаний главного счетчика
 export const updateCounterGeneralMain = async (evt: H3Event) => {
-    const token = getHeaders(evt).authorization
 
-    /*TODO:
-//вставить обратоку токена на роль администратор
-*/
+    const token = getHeaders(evt).authorization
+    console.log('токен', token)
+         const decoderToken = examinationToken(token)
+
+         if (decoderToken.role != "admin") {
+                 throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка прав доступа...'
+            })
+         }
 
 
     const body = await readBody(evt) 
@@ -54,14 +62,20 @@ export const updateCounterGeneralMain = async (evt: H3Event) => {
 }
 
 
-
+//закрыть месяц и посчитать перерасход
 export const closeMonthMain = async (evt: H3Event) => {
-    const token = getHeaders(evt).authorization
 
-    /*TODO:
-//вставить обратоку токена на роль администратор
-*/
 
+             const token = getHeaders(evt).authorization
+         const decoderToken = examinationToken(token)
+
+         if (decoderToken.role != "admin") {
+                 throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка прав доступа...'
+            })
+    }
+    
     const body = await readBody(evt) 
     console.log(body)
 
@@ -83,6 +97,40 @@ export const closeMonthMain = async (evt: H3Event) => {
         return {
             data:create,
             rep:resultUpdate
+        }
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+    }
+}
+
+
+//добавить доп расходы за месяц
+export const addExpenses = async (evt: H3Event) => {
+
+             const token = getHeaders(evt).authorization
+         const decoderToken = examinationToken(token)
+
+         if (decoderToken.role != "admin") {
+                 throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка прав доступа...'
+            })
+         }
+ 
+
+    const body = await readBody(evt) 
+    console.log(body)
+    
+
+    try {
+     
+        const result = await adminModel.addExpenses({ expenses: body.data.pay, commentExpenses: body.data.comment, id:body.data.id })
+        return {
+            data: result,
+            status:true
         }
     } catch {
         throw createError({

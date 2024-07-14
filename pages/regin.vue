@@ -24,6 +24,7 @@ const user = reactive<IUserLogin>({
     repeatPassword:  null,
     street: '',
     house: null,
+    startCount: null,
 
 }) 
 
@@ -115,6 +116,12 @@ if(error.value){
           <InputNumber class="w-28" v-model="user.house" />
         </div>
       </div>
+      <div class="w-full ">
+          <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Последние переданные показания</label>
+          <div class="mt-2 ">     
+            <InputNumber class="w-28" v-model="user.startCount" />
+          </div>
+        </div>
 
       <div class="w-full">
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Пароль</label>

@@ -1,8 +1,11 @@
 import { H3Event } from 'h3'
 import bcrypt from "bcrypt";
 import * as userModel from '~~/server/model/user'
+import * as countModel from '~~/server/model/counter'
 import { default as jwt } from 'jsonwebtoken';
-import {SECRET} from '~~/server/secret'
+import { SECRET } from '~~/server/secret'
+import { examinationToken } from '~~/server/helpers/helpers'
+
 
 
 const generateAccessToken = (id: number, role: string) => {
@@ -80,11 +83,16 @@ export const create = async (evt: H3Event) => {
             phone:  body.phone,          
             password:  passwordHash
         })
-        
+          
+          console.log(result)
+          
+          const startCountUser = await countModel.startCount({id_user:result.insertId, lastCount:body.startCount, dateLastCount:Date.now(), startCount:body.startCount})
+        console.log('коунтерстарт',startCountUser)
         return {
             data:{
                result:result,
-               status: true
+                status: true,
+               counter:startCountUser
             }
         }
     } catch {
@@ -130,13 +138,10 @@ if (!validPassword) {
                     street: user[0].street,
                     house: user[0].number,
                     phone: user[0].phone,
-                    role: ''
+                    role: user[0].role
         }
 
-        if (user[0].role !== "user") {
-            dataUser.role = user[0].role
-        }
-     
+      
         return {
                 token:token,
                 user: dataUser    
@@ -148,4 +153,27 @@ if (!validPassword) {
         })
     }
 }
+
+
+
+//аутинтификация по токену
+export const authToken = async (evt: H3Event) => {
+    const token = getHeaders(evt).authorization
+    const decoderToken = examinationToken(token)
+
+    try {
+    //получение токена
+    const user = await  userModel.readUserForId({id:decoderToken.id})
+      
+        return {                
+                user: user    
+        }
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Произошла ошибка при чтении...'
+        })
+    }
+}
+
 
