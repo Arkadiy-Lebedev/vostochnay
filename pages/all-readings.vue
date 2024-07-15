@@ -179,7 +179,7 @@ const filter = () => {
 <template>
   <div class="container mx-auto">
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">     
-      <Button class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
+      <Button v-if="userInfo.role == 'admin'" class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
       <div class="w-52">
          <Calendar :maxDate="today"  showIcon fluid v-model="date" view="month" dateFormat="MM" placeholder="Выбирете месяц" />      
       </div>
@@ -286,7 +286,7 @@ const filter = () => {
 
      <Dialog v-model:visible="isDialogDop" modal header="Добавить расходы"
         :style="{ width: '25rem' }">
-      <FormAddExpenses :id="data?.main[0].id" @closeModal="isDialogDop = false" :pay="data?.main[0].expenses" :comment="data?.main[0].commentExpenses"  @refresh="refreshData"></FormAddExpenses>
+      <FormAddExpenses :id="data?.main[0].id || 0" @closeModal="isDialogDop = false" :pay="data?.main[0].expenses || null" :comment="data?.main[0].commentExpenses || ''"  @refresh="refreshData"></FormAddExpenses>
     </Dialog>
 </div></template>
 

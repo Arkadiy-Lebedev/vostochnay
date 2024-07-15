@@ -38,6 +38,7 @@ const sendRegin = async () => {
   if(user.password != user.repeatPassword){
     errors.isError = true
     errors.text = "Пароли не совпадают"
+    isLoad.value = false
     return
   }
 
@@ -46,6 +47,7 @@ const sendRegin = async () => {
  if(!user[key] || user[key] == ''){
   errors.isError = true
     errors.text = "Все поля обязательны для заполнения"
+    isLoad.value = false
   return 
  }
 }

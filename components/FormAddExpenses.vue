@@ -4,7 +4,7 @@ const tokenCookie = useCookie('tokenUser')
 interface Props {
   id: number,
   pay: number | null,
-  comment: string,
+  comment: string ,
 }
 const props = defineProps<Props>()
 

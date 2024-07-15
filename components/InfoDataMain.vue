@@ -1,15 +1,15 @@
 <script setup lang="ts">
 interface Props {
   month: string,
-  count: number,
+  count: number | null,
   date: string,
   lastCount: number,
   consumption: number,
   waterHouses: number | null,
   differenceLastWaterHouses: number,
   differenceNowWaterHouses: number | null,
-  differencePaySingleHouses: number,
-  totalToPay: number | null,
+  differencePaySingleHouses: string | null,
+  totalToPay: string | null,
   expenses: number | null
   commentExpenses: string
 

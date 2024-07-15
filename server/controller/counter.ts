@@ -122,8 +122,7 @@ const decoderToken = examinationToken(token)
 export const create = async (evt: H3Event) => {
     
          const body = await readBody(evt) 
-        console.log(body)
-         console.log('body')
+console.log(body)
              if(!body.lastCount){
             throw createError({
                 statusCode: 500,
@@ -134,8 +133,17 @@ export const create = async (evt: H3Event) => {
         try {   
         const token = getHeaders(evt).authorization
         const decoderToken = examinationToken(token)
-
         const findCounterFoIdUser = await counterModel.readForId({ id: decoderToken.id }) 
+
+
+if( body.lastCount < findCounterFoIdUser[0].lastCount) {
+        throw createError({
+                statusCode: 500,
+                statusMessage: 'Не верные показания.'
+            })
+       }
+
+
      const newArr = [...findCounterFoIdUser[0].items]
 
          const month = dayjs().format('MMMM')
@@ -190,7 +198,7 @@ export const create = async (evt: H3Event) => {
     } catch {
         throw createError({
             statusCode: 500,
-            statusMessage: 'Произошла ошибка при чтении...'
+            statusMessage: 'Ошибка данных'
         })
     }
 }

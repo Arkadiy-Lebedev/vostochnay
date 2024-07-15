@@ -3,7 +3,7 @@
 const tokenCookie = useCookie('tokenUser')
 interface Props {
   lastCount: number,
-  month: string
+  month: string | null
 }
 const props = defineProps<Props>()
 

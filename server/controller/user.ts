@@ -36,7 +36,7 @@ export const create = async (evt: H3Event) => {
    const body = await readBody(evt)
    console.log(body)
 
-   if (body.phone == '' || body.street == '' || !body.house) {
+   if (body.phone == '' || body.street == '' || !body.house || !body.startCount) {
     throw createError({
         statusCode: 500,
         statusMessage: 'Заполните обязательные поля'

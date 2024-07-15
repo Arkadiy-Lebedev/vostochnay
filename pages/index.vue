@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import type { CounterModel } from '~~/server/model/counter'
 import type { ISettingsModel } from '~~/server/model/settings'
-
+import type { IError } from '@/types/helper.types'
 /* TODO
  * добавить topay сумму к оплате
  */
@@ -25,6 +25,11 @@ const expenses = ref<number | null>(null)
 const commentExpenses = ref<string>('')
 
 const lastReadings = ref<number | null>(null)
+
+const errors = reactive<IError>({
+    isError: false,
+    text: '',
+}) 
 
 const dataMounth = computed(() => {
 	const newArray = counterUser.value ? [...counterUser.value?.items] : []
@@ -66,9 +71,26 @@ const { data, refresh, pending } = await useFetch('/api/counter/user', {
 })
 
 const sendData = async () => {
+	errors.isError = false
 	if (!readings.value) {
-		alert('показания должны быть заполнены')
+		errors.isError = true
+		errors.text = 'Введите показания'
+
 		return
+	}
+
+	if ( counterUser.value?.lastCount && readings.value < counterUser.value?.lastCount ) {
+		errors.isError = true
+		errors.isError = true
+		errors.text = 'Не верные показания. Текущие показания не могут быть меньше последних переданных'
+		return
+	}
+
+	if ( !counterUser.value?.lastCount ) {
+		errors.isError = true
+		errors.text = 'Не удалось загрузить последние показания. Попробуйте позже'
+		return
+
 	}
 
 	const differenceLastWater =
@@ -87,6 +109,13 @@ const sendData = async () => {
 			Authorization: String(tokenCookie.value),
 		},
 	})
+
+	if(error.value){   
+        errors.isError=true
+        errors.text = error.value?.data?.statusMessage
+        return
+    }
+
 	refresh()
 }
 
@@ -157,7 +186,7 @@ const totalPay = computed(() => {
 						<div class="">
 							
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-							<Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount || 0 + ' куб.м.'">
+							<Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'">
 							</Tag>
 						</div>
 					</div>
@@ -198,13 +227,15 @@ const totalPay = computed(() => {
 						<div class="h-px flex-auto bg-gray-100"></div>
 					</div>
 					<div class="flex  gap-3 mt-3">
-						<div>
-							<InputNumber class="w-24" v-model="readings" inputId="withoutgrouping"
+						<div >
+							<InputNumber  v-model="readings" inputId="withoutgrouping"
 							:placeholder="counterUser?.lastCount.toString() || 'Текущие'" :min="0" :useGrouping="false" />
 						</div>
 						<Button @click="sendData" :disabled="pending" label="Передать" />
 					</div>
-
+					<div class="mt-3">
+        <InlineMessage  v-if="errors.isError" severity="error">{{errors.text }}</InlineMessage>
+      </div>
 					
 
 				</div>
