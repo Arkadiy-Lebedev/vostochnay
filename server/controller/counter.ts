@@ -265,19 +265,138 @@ try {
          return{
             data:result
          }      
-    }
-   
-   
+    } 
      }
-
-
  catch {
     throw createError({
         statusCode: 500,
         statusMessage: 'Произошла ошибка ...'
     })
 }
-
-
-
      }
+
+     // отправка сообщения
+ export const sendMessageUser = async (evt: H3Event) => {
+
+        const bodyData = await readBody(evt) 
+        const body = bodyData.data
+
+
+         const token = getHeaders(evt).authorization
+         const decoderToken = examinationToken(token)
+
+         if (decoderToken.role != "admin") {
+                 throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка прав доступа ...'
+            })
+         }
+
+
+try {   
+        const result  = await counterModel.sendMessageUser({id:body.id , comment:body.message })     
+         return{
+            data:result
+         }      
+    }  
+ catch {
+    throw createError({
+        statusCode: 500,
+        statusMessage: 'Произошла ошибка ...'
+    })
+}
+     }
+
+
+     //Добавить показания администратором для юзера
+     export const countSendAdminForUser = async (evt: H3Event) => {
+    
+        const body = await readBody(evt) 
+
+            if(!body.lastCount){
+           throw createError({
+               statusCode: 500,
+               statusMessage: 'Не верные показания.'
+           })
+       }
+    
+       const token = getHeaders(evt).authorization
+       const decoderToken = examinationToken(token)
+
+       if (decoderToken.role != "admin") {
+        throw createError({
+       statusCode: 500,
+       statusMessage: 'Ошибка прав доступа...'
+   })
+}
+
+   try {   
+const findCounterFoIdUser = await counterModel.readForId({ id: body.id }) 
+console.log(body)
+
+if( body.lastCount < findCounterFoIdUser[0].lastCount) {
+       throw createError({
+               statusCode: 500,
+               statusMessage: 'Не верные показания.'
+           })
+      }
+
+
+    const newArr = [...findCounterFoIdUser[0].items]
+
+        const month = dayjs().format('MMMM')
+       const year = dayjs().format('YYYY')
+           const item = {  
+          
+               year: year,
+               month: month,
+               count: body.lastCount,
+               dateCount: Date.now(),
+               toPay: body.toPay,
+               pay: null,
+               datePay: null,
+               isPay: false,
+               isOurPay: false,
+               payOur: null,
+               comment: '',
+               differenceLastWater: body.differenceLastWater
+           }
+
+           //если юзер еще никогда не передавал показания
+        if(!findCounterFoIdUser[0]){            
+            const result  = await counterModel.create({id_user:body.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: [item]})     
+              
+            return {
+               data:result
+            }
+        } 
+        else {
+
+         const newData =  findCounterFoIdUser[0].items.find(el => el.month == month && el.year == year)
+           // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month)
+
+            //проверка, если показания не пердавались в текущем месяце
+            if (!newData) {
+             newArr.push(item)
+           findCounterFoIdUser[0].items = newArr
+           const result  = await counterModel.updateCounterInAddMonthUser({id_user:body.id, lastCount: body.lastCount, dateLastCount: Date.now(), items: findCounterFoIdUser[0].items})     
+            return{
+               data:result
+            }      
+       }
+           // newData.count = body.lastCount
+           // newData.dateCount = Date.now()            
+           // newArrayItems.push(newData)
+      
+        }
+  
+       return {
+           error:'В этом месяца уже передавались показания'
+       }
+   } catch {
+       throw createError({
+           statusCode: 500,
+           statusMessage: 'Ошибка данных'
+       })
+   }
+}

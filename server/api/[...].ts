@@ -12,7 +12,6 @@ router.post('/user/login', defineEventHandler(userCtrl.loginUser))
 
 router.get('/counter/all-read', defineEventHandler(counterCtrl.readForCounterDateAndMain))
 router.get('/counter/all-read-admin', defineEventHandler(counterCtrl.readForCounterDateAndMainAdmin))
-
 router.get('/counter/user', defineEventHandler(counterCtrl.userForToken))
 router.post('/counter/add', defineEventHandler(counterCtrl.create))
 
@@ -21,6 +20,8 @@ router.put('/admin/add-expenses', defineEventHandler(adminCtrl.addExpenses))
 router.put('/admin/count', defineEventHandler(adminCtrl.updateCounterGeneralMain))
 router.post('/admin/count/create', defineEventHandler(adminCtrl.closeMonthMain))
 router.post('/admin/count/update-pay', defineEventHandler(counterCtrl.updateDataToPayForAdmin))
+router.post('/admin/message', defineEventHandler(counterCtrl.sendMessageUser))
+router.post('/admin/send-count', defineEventHandler(counterCtrl.countSendAdminForUser))
 
 router.get('/settings', defineEventHandler(adminCtrl.read))
 

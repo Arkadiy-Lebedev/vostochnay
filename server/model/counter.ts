@@ -97,7 +97,7 @@ export const updateCounterInAddMonthUser = async (data: Pick<CounterModel, 'item
     return result.length === 1 ? result[0] as CounterModel : null
 }
 
-// jобновление оплаты пользовталея администратором
+// обновление оплаты пользовталея администратором
 export const updateDataToPayForAdmin = async (data: Pick<CounterModel, 'items' |  'id_user' >) => {   
     console.log("дата",data)
     
@@ -115,6 +115,17 @@ console.log("дата",data)
     const result = await sql({
         query: 'INSERT INTO list  (id_user, items, lastCount, dateLastCount, startCount)  VALUES (?, ?, ?, ?, ?)',
         values: [data.id_user, JSON.stringify([]), data.lastCount, data.dateLastCount, data.startCount]
+    }) as any
+
+    return result.length === 1 ? result[0] as CounterModel : null
+}
+
+//отправить сообщение пользователю
+export const sendMessageUser = async (data: Pick<CounterModel, 'id' |  'comment' >) => {   
+
+    const result = await sql({
+        query: 'UPDATE list SET comment = ? WHERE id=?',
+        values: [data.comment,  data.id]
     }) as any
 
     return result.length === 1 ? result[0] as CounterModel : null

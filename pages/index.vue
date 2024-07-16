@@ -23,7 +23,7 @@ const differenceToPay = ref<number | null>(null)
 const readings = ref<number | null>(null)
 const expenses = ref<number | null>(null)
 const commentExpenses = ref<string>('')
-
+const isLoad = ref(false)
 const lastReadings = ref<number | null>(null)
 
 const errors = reactive<IError>({
@@ -93,6 +93,8 @@ const sendData = async () => {
 
 	}
 
+	isLoad.value= true
+
 	const differenceLastWater =
 		readings.value - (counterUser.value ? counterUser.value?.lastCount : 0)
 	const toPay =
@@ -113,9 +115,10 @@ const sendData = async () => {
 	if(error.value){   
         errors.isError=true
         errors.text = error.value?.data?.statusMessage
+		isLoad.value= false
         return
     }
-
+	isLoad.value= false
 	refresh()
 }
 
@@ -231,7 +234,7 @@ const totalPay = computed(() => {
 							<InputNumber  v-model="readings" inputId="withoutgrouping"
 							:placeholder="counterUser?.lastCount.toString() || 'Текущие'" :min="0" :useGrouping="false" />
 						</div>
-						<Button @click="sendData" :disabled="pending" label="Передать" />
+						<Button @click="sendData" :disabled="pending" label="Передать"  :loading="isLoad"/>
 					</div>
 					<div class="mt-3">
         <InlineMessage  v-if="errors.isError" severity="error">{{errors.text }}</InlineMessage>
@@ -313,6 +316,7 @@ const totalPay = computed(() => {
 				<InlineMessage severity="info">{{ counterUser?.comment }}</InlineMessage>
 								
 				</div>
+			
 
 			
 

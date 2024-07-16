@@ -11,7 +11,8 @@ const { userInfo } = useUserStore()
 import type { CounterModelAndMain, CounterModelAndMainAdmin } from '~~/server/model/counter'
 import type { ItemAdminModel } from '~~/server/model/admin'
 import type { ISettingsModel } from '~~/server/model/settings'
-console.log(dayjs().millisecond(1))
+
+type  dialogStatusContent = 'pay' | 'message' | 'count'
 
 /*TODO:
 * при закрытии месяца нужно создават следующий месяц в базе куда передапть count в поле lastcount 
@@ -24,6 +25,8 @@ const isDialog = ref(false)
 const isDialogDop = ref(false)
 const isLoading = ref(false)
 const enterUser = ref<CounterModelAndMain | null>(null)
+const dialogContent = ref<dialogStatusContent>('pay')
+const userMessage = reactive<{  id: number;  message:string}>({  id: 0,  message:'' })
 
 const month = computed(() => {
   return dayjs(date.value).format('MMMM')
@@ -123,7 +126,8 @@ const totalToPay = computed(() => {
 // data.value?.main[0].differenceNowWaterHouses ? data.value?.main[0].differenceNowWaterHouses : 0) / (data.value.setting[0].houses - data.value.setting[0].exclude))
 
 const setUser = (id: number) => {
-  console.log(id)
+  dialogContent.value = 'pay'
+ 
   isDialog.value = true
   const user = data.value?.data.find(el => el.id == id)
   if (user) {
@@ -131,7 +135,32 @@ const setUser = (id: number) => {
   } else {
     enterUser.value = null
   }
+}
 
+
+const messageUser = (id: number) => {
+  dialogContent.value = 'message'
+
+  isDialog.value = true
+    userMessage.id = id
+  const user = data.value?.data.find(el => el.id == id)
+  if (user) {
+     enterUser.value = user
+    
+  } else {
+    enterUser.value = null
+  }
+}
+
+const countSendUser = (id: number) => {
+  dialogContent.value = 'count'
+  isDialog.value = true
+  const user = data.value?.data.find(el => el.id == id)
+  if (user) {
+    enterUser.value = user
+  } else {
+    enterUser.value = null
+  }
 }
 
 
@@ -173,11 +202,10 @@ const filter = () => {
   })
 }
 
-
 </script>
 
 <template>
-  <div class="container mx-auto">
+   <div class="container mx-auto">
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">     
       <Button v-if="userInfo.role == 'admin'" class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
       <div class="w-52">
@@ -237,13 +265,24 @@ const filter = () => {
       <DataTable :value="dataFilter" tableStyle="min-width: 50rem">
         <Column v-if="userInfo.role == 'admin'" header="ФИО">
             <template #body="slotProps">
-              <p @click="setUser(slotProps.data.id)" class="hover:opacity-75 cursor-pointer"> {{ slotProps.data.family }} {{ slotProps.data.name }} {{ slotProps.data.surname }}</p>
-              <p>{{ slotProps.data.phone }}</p>
+              <p @click="setUser(slotProps.data.id)" class="hover:opacity-75 cursor-pointer underline"> {{ slotProps.data.family }} {{ slotProps.data.name }} {{ slotProps.data.surname }} <br> <span>{{ slotProps.data.street }} {{ slotProps.data.number }}</span></p>
+              <p class="mt-2">{{ slotProps.data.phone }}</p>
+               <div class="mt-1 flex gap-3">
+                <Button  @click="messageUser(slotProps.data.id)" text rounded icon="pi pi-envelope" aria-label="Filter" size="small" />
+                <Button v-if="!slotProps.data.items[0]?.count" @click="countSendUser(slotProps.data.id)" text rounded icon="pi pi-file-edit" aria-label="Filter" size="small" />
+              </div>              
+             
             </template>
           </Column>
-        <Column header="Адрес">
+        <Column v-if="userInfo.role != 'admin'" header="Адрес">
           <template #body="slotProps">
             <p class=""> {{ slotProps.data.street }} {{ slotProps.data.number }}</p>
+          </template>
+        </Column>
+         <Column v-if="userInfo.role == 'admin'" header="Сообщения">
+          <template #body="slotProps">
+            <p v-if="slotProps.data.items[0]?.comment" class="text-sm text-gray-600"><span class="font-semibold">За месяц:</span> {{ slotProps.data.items[0].comment }}</p>
+              <p v-if="slotProps.data?.comment" class="text-sm text-gray-600"><span class="font-semibold">Общее:</span> {{ slotProps.data.comment }}</p>
           </template>
         </Column>
         <Column header="Расход">
@@ -280,13 +319,23 @@ const filter = () => {
 
     <Dialog v-model:visible="isDialog" modal :header="enterUser?.street + ' ' + enterUser?.number"
       :style="{ width: '25rem' }">
-    <Formpay :user="enterUser" @closeModal="isDialog= false" :difference="totalToPay"
+    <Formpay v-if="dialogContent == 'pay'" :user="enterUser" @closeModal="isDialog= false" :difference="totalToPay"
       @refresh="refreshData"></Formpay>
+
+      <div v-else-if="dialogContent == 'message'" class="">
+      <FormMessageUser :id="userMessage.id" :message="enterUser?.comment || ''" @closeModal="isDialog= false"  @refresh="refreshData"></FormMessageUser>
+      </div>
+<div v-else-if="dialogContent == 'count'" class="">
+      <FormCountUser :id="enterUser?.id_user || 0" :count="enterUser?.lastCount || 0" @closeModal="isDialog= false" :price="data?.setting[0].price || null"  @refresh="refreshData"></FormCountUser>
+      </div>
+      
   </Dialog>
 
      <Dialog v-model:visible="isDialogDop" modal header="Добавить расходы"
         :style="{ width: '25rem' }">
-      <FormAddExpenses :id="data?.main[0].id || 0" @closeModal="isDialogDop = false" :pay="data?.main[0].expenses || null" :comment="data?.main[0].commentExpenses || ''"  @refresh="refreshData"></FormAddExpenses>
+
+      <FormAddExpenses  :id="data?.main[0].id || 0" @closeModal="isDialogDop = false" :pay="data?.main[0].expenses || null" :comment="data?.main[0].commentExpenses || ''"  @refresh="refreshData"></FormAddExpenses>
+    
     </Dialog>
 </div></template>
 
