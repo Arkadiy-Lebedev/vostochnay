@@ -184,6 +184,9 @@ const totalPay = computed(() => {
 				</div>
 
 				<div class="">
+					<div class="mb-8">
+        <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
+      </div>
 					<div class="flex gap-3 items-center mb-3">
 						<p>Последние переданные показания:</p>
 						<div class="">

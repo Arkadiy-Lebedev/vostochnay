@@ -46,6 +46,22 @@ export const updateCounterGeneralMain = async (evt: H3Event) => {
 
     const month = dayjs().format('MMMM')
     const year = dayjs().format('YYYY')
+
+    
+    try {
+        const result = await adminModel.readForMonth({ month: month, year: +year })
+        if(!result.length || (result.length>0 && result[0].lastCount > body.count)){
+            throw createError({
+                statusCode: 500,
+                statusMessage: 'Ошибка в показаниях.'
+            })
+        }  
+    } catch {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'Ошибка в показаниях.'
+        })
+    }
     
 
     try {

@@ -24,6 +24,7 @@ router.post('/admin/message', defineEventHandler(counterCtrl.sendMessageUser))
 router.post('/admin/send-count', defineEventHandler(counterCtrl.countSendAdminForUser))
 
 router.get('/settings', defineEventHandler(adminCtrl.read))
+router.put('/settings/send-message', defineEventHandler(settingsCtrl.updateAllMessage))
 
 router.get('/auth', defineEventHandler(userCtrl.authToken))
 

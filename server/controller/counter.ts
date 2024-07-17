@@ -107,7 +107,10 @@ const decoderToken = examinationToken(token)
         return {
             data: result,
             setting: setting,
-            difference:null
+            difference:null,
+            differenceToPay: null,
+            expenses:null,
+           commentExpenses: null
         }
     } catch {
         throw createError({
@@ -247,7 +250,7 @@ try {
 
     const findCounterFoIdUser = await counterModel.readForId({ id: body.id }) 
 
- console.log(findCounterFoIdUser)
+
       let newData =  findCounterFoIdUser[0].items.find(el => el.month == body.month && el.year == body.year)
       let newItems =  findCounterFoIdUser[0].items.filter(el => el.month != body.month && el.year != body.year)
         // const newArrayItems = findCounterFoIdUser[0].items.filter(el => el.month != month)

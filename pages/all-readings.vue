@@ -23,6 +23,7 @@ const tokenCookie = useCookie('tokenUser')
 const date = ref()
 const isDialog = ref(false)
 const isDialogDop = ref(false)
+const isDialogAllMessage = ref(false)
 const isLoading = ref(false)
 const enterUser = ref<CounterModelAndMain | null>(null)
 const dialogContent = ref<dialogStatusContent>('pay')
@@ -168,6 +169,7 @@ const countSendUser = (id: number) => {
 const refreshData = () => {
   isDialog.value = false
   isDialogDop.value = false
+  isDialogAllMessage.value = false
   refresh()
 }
 
@@ -206,8 +208,15 @@ const filter = () => {
 
 <template>
    <div class="container mx-auto">
-    <div class="bg-white border-1 border-slate-200  rounded-lg p-8">     
-      <Button v-if="userInfo.role == 'admin'" class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
+
+    <div class="bg-white border-1 border-slate-200  rounded-lg p-8 ">   
+      <div  v-if="userInfo.role == 'admin'" class="flex gap-3">
+        <Button  class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
+      <Button class="mb-7" @click="isDialogAllMessage = true" label="Сообщение всем" icon="pi pi-envelope" outlined />      
+      </div>  
+      <div class="mb-10">
+        <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
+      </div>
       <div class="w-52">
          <Calendar :maxDate="today"  showIcon fluid v-model="date" view="month" dateFormat="MM" placeholder="Выбирете месяц" />      
       </div>
@@ -267,7 +276,7 @@ const filter = () => {
             <template #body="slotProps">
               <p @click="setUser(slotProps.data.id)" class="hover:opacity-75 cursor-pointer underline"> {{ slotProps.data.family }} {{ slotProps.data.name }} {{ slotProps.data.surname }} <br> <span>{{ slotProps.data.street }} {{ slotProps.data.number }}</span></p>
               <p class="mt-2">{{ slotProps.data.phone }}</p>
-               <div class="mt-1 flex gap-3">
+               <div v-if="month ==  dayjs().format('MMMM')" class="mt-1 flex gap-3">
                 <Button  @click="messageUser(slotProps.data.id)" text rounded icon="pi pi-envelope" aria-label="Filter" size="small" />
                 <Button v-if="!slotProps.data.items[0]?.count" @click="countSendUser(slotProps.data.id)" text rounded icon="pi pi-file-edit" aria-label="Filter" size="small" />
               </div>              
@@ -333,10 +342,13 @@ const filter = () => {
 
      <Dialog v-model:visible="isDialogDop" modal header="Добавить расходы"
         :style="{ width: '25rem' }">
-
       <FormAddExpenses  :id="data?.main[0].id || 0" @closeModal="isDialogDop = false" :pay="data?.main[0].expenses || null" :comment="data?.main[0].commentExpenses || ''"  @refresh="refreshData"></FormAddExpenses>
-    
-    </Dialog>
+        </Dialog>
+
+        <Dialog v-model:visible="isDialogAllMessage" modal header="Общее уведомление"
+        :style="{ width: '25rem' }">
+      <FormMessageAll  :id="data?.setting[0].id || 0" :message="data?.setting[0].message || ''" @closeModal="isDialogAllMessage= false"  @refresh="refreshData"></FormMessageAll>
+        </Dialog>
 </div></template>
 
 <style>.p-accordion-header-text::first-letter {

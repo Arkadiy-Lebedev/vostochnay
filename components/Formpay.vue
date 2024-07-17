@@ -100,8 +100,8 @@ isLoad.value= true
             </div>
 </Fieldset>     
 
-        
-            <Textarea class="w-full mt-5" v-model="payUser.comment" rows="3"  placeholder="Сообщение к текущему месяцу"/>
+         <p class="font-semibold mt-5">Комментарий за месяц:</p>
+            <Textarea class="w-full mt-1" v-model="payUser.comment" rows="3"  placeholder="Сообщение к текущему месяцу"/>
             <InlineMessage class="mt-3 w-full "  v-if="errors.isError" severity="error">{{errors.text }}</InlineMessage>
             <div class="flex justify-end gap-2 mt-5">
                 <Button type="button" label="Отмена" severity="secondary" @click="emit('closeModal')"></Button>
