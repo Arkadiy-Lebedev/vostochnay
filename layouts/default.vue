@@ -1,7 +1,7 @@
 <template>
     <div class="min-h-dvh">
         <Menu></Menu>
-        <InfoLine></InfoLine>
+        <!-- <InfoLine></InfoLine> -->
             <slot />
 
     </div>

@@ -162,16 +162,22 @@ const totalPay = computed(() => {
 })
 
 
+const dutyUser = computed(() => {
+
+	return total.value - totalPay.value
+})
 
 
 </script>
 
 <template>
-	<div class="container mx-auto">
-		
-		<div class="bg-white border-1 border-slate-200 rounded-lg p-8">
-			<div class="flex flex-row-reverse justify-between">
-				<div class="w-96">
+	<div class="container mx-auto pt-5 pb-5 pl-3 pr-3  sm:p-0">
+			<div v-if="data?.setting[0].message" class="m-2 mt-3 mb-3 ">
+        <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
+      </div>
+		<div class="bg-white border-2 border-slate-200 p-8 rounded-xl">
+			<div class="flex flex-row">
+				<!-- <div class="w-96">
 					<Panel header="">
 						<div class="flex gap-3 items-center mb-3">
 							<p class="font-semibold">1 куб.м.:</p>
@@ -181,22 +187,19 @@ const totalPay = computed(() => {
 							</div>
 						</div>
 					</Panel>
-				</div>
+				</div> -->
 
 				<div class="">
-					<div class="mb-8">
-        <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
-      </div>
-					<div class="flex gap-3 items-center mb-3">
+
+					<div class="flex flex-col sm:flex-row gap-3 items-start  sm:items-center mb-5">
 						<p>Последние переданные показания:</p>
-						<div class="">
-							
+						<div class="">							
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
 							<Tag v-else class="text-lg" severity="secondary" :value="counterUser?.lastCount + ' куб.м.'">
 							</Tag>
 						</div>
 					</div>
-					<div class="flex gap-3 items-center mb-3">
+					<div class="flex gap-3 items-center mb-5 ">
 						<p>Дата:</p>
 						<div class="">
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
@@ -206,7 +209,7 @@ const totalPay = computed(() => {
 								"></Tag>
 						</div>
 					</div>
-					<div v-if="findNowMonth?.differenceLastWater" class="flex gap-3 items-center mb-3">
+					<div v-if="findNowMonth?.differenceLastWater" class="flex gap-3 items-center mb-5">
 						<p>Расход за месяц:</p>
 						<div class="">
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
@@ -215,11 +218,11 @@ const totalPay = computed(() => {
 							</Tag>
 						</div>
 					</div>
-					<div v-if="findNowMonth?.toPay" class="flex gap-3 items-center mb-3">
+					<div v-if="findNowMonth?.toPay" class="flex gap-3 items-center mb-5">
 						<p>За потребление:</p>
 						<div class="">
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-							<Tag v-else class="text-lg" severity="secondary" :value="findNowMonth?.toPay + ' руб.'"></Tag>
+							<Tag v-else class="text-lg" severity="warn" :value="findNowMonth?.toPay + ' руб.'"></Tag>
 						</div>
 					</div>
 				</div>
@@ -232,7 +235,7 @@ const totalPay = computed(() => {
 						</h4>
 						<div class="h-px flex-auto bg-gray-100"></div>
 					</div>
-					<div class="flex  gap-3 mt-3">
+					<div class="flex  gap-3 mt-3 flex-wrap">
 						<div >
 							<InputNumber  v-model="readings" inputId="withoutgrouping"
 							:placeholder="counterUser?.lastCount.toString() || 'Текущие'" :min="0" :useGrouping="false" />
@@ -251,37 +254,37 @@ const totalPay = computed(() => {
 				</div>
 			</div>
 			<div v-if="difference">
-				<Divider />
-				<div class="flex gap-3 items-center mb-3">
+				<Divider class="pt-5 pb-5"/>
+				<div class="flex gap-3 items-center mb-5 flex-wrap">
 					<p>Перерасход по общей трубе:</p>
 					<div class="">
 						<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
 						<Tag v-else class="text-lg" severity="secondary" :value="difference + ' куб.м.'"></Tag>
 					</div>
 				</div>				
-				<div class="flex gap-3 items-center mb-3">
+				<div class="flex gap-3 items-center mb-5 flex-wrap">
 					<p>За общий перерасход:</p>
 					<div class="">
 						<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-						<Tag v-else class="text-lg" severity="secondary" :value="differencePaySingleHouse + ' руб.'"></Tag>
+						<Tag v-else class="text-lg" severity="warn" :value="differencePaySingleHouse + ' руб.'"></Tag>
 					</div>
 				</div>
-				<Divider />
+				<Divider class="pt-5 pb-5"/>
 			</div>
 			<div v-if="expenses">
-					<Divider v-if="!difference"/>
-					<div class="flex gap-3 items-center mb-3">
+					<Divider v-if="!difference" class="pt-5 pb-5"/>
+					<div class="flex flex-col sm:flex-row gap-3 items-start  sm:items-center mb-5">
 						<p>Дополнительные траты:</p>
 						<div class="">
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
 							<Tag v-else class="text-lg" severity="secondary" :value="expenses + ' руб.'"></Tag>
 						</div>
 					</div>
-					<div class="flex gap-3 items-center mb-3">
-							<p>Описание:</p>
+					<div class="flex flex-col sm:flex-row gap-3 items-start  sm:items-center mb-5">
+						
 							<div class="">
 								<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-								<p v-else > {{ commentExpenses }}</p>
+								<p v-else class=" text-gray-600"> {{ commentExpenses }}</p>
 							</div>
 						</div>
 					<div class="flex gap-3 items-center mb-3">
@@ -292,30 +295,37 @@ const totalPay = computed(() => {
 						</div>
 					</div>
 					
-					<Divider />
+					<Divider class="pt-5 pb-5" />
 				</div>
-			<div class="flex gap-3 items-center mb-3">
+			<div class="flex gap-3 items-center mb-5">
 				<p>Итого:</p>
 				<div class="">
 					<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-					<Tag v-else class="text-lg" severity="warn" :value="total + ' руб.'"></Tag>
+					<Tag v-else class="text-lg" severity="warn" :value="total.toFixed(2) + ' руб.'"></Tag>
 				</div>
 			</div>
-			<div class="flex gap-3 items-center mb-3">
+			<div class="flex gap-3 items-center mb-5">
 				<p>Оплачено:</p>
 				<div class="">
 					<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-					<Tag v-else class="text-lg" severity="success" :value="totalPay + ' руб.'"></Tag>
+					<Tag v-else class="text-lg" severity="success" :value="totalPay.toFixed(2) + ' руб.'"></Tag>
 				</div>
 			</div>
-			<div v-if="findNowMonth?.comment" class="flex gap-3 items-center mb-3">
-					<p>Комментарий:</p>
+			<div v-if="dutyUser>0" class="flex gap-3 items-center mb-5">
+				<p>Долг:</p>
+				<div class="">
+					<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
+					<Tag v-else class="text-lg" severity="danger" :value="dutyUser.toFixed(2) + ' руб.'"></Tag>
+				</div>
+			</div>
+			<div v-if="findNowMonth?.comment" class="flex gap-3 items-center mb-3 mt-3">
+					<p class=" font-semibold">Комментарий:</p>
 					<div class="">
 						<p>{{ findNowMonth?.comment }}</p>
 					</div>
 				</div>
 
-			<div v-if="counterUser?.comment" class="flex gap-3 items-center mb-3">
+			<div v-if="counterUser?.comment" class="flex gap-3 items-center mb-3 mt-7">
 				<InlineMessage severity="info">{{ counterUser?.comment }}</InlineMessage>
 								
 				</div>
@@ -331,18 +341,21 @@ const totalPay = computed(() => {
 			</div>
 			<div v-else class="card mt-1">
 				<Accordion :activeIndex="0" multiple>
-					<AccordionTab v-for="data in dataMounth" :key="data.datePay"
+					<AccordionTab v-for="data in dataMounth" :key="data.datePay || 0"
 						:header="dayjs(data.dateCount).locale('ru').format('MMMM') + ' ' + dayjs(data.dateCount).locale('ru').format('YYYY')">
-						<p class="m-0">Показания: {{ data.count }} куб.м.</p>
-						<p class="m-0">Расход: {{ data.differenceLastWater }} куб.м.</p>
-						<p class="m-0">
-							Дата: {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}
+						<p class="mb-2"><span class="font-semibold">Показания: </span>{{ data.count }} куб.м.</p>
+						<p class="mb-2"><span class="font-semibold">Расход:</span> {{ data.differenceLastWater }} куб.м.</p>
+						<p class="mb-2">
+							<span class="font-semibold">Дата:</span> {{ dayjs(data.dateCount).locale('ru').format('DD.MM.YY') }}
 						</p>
-						<p class="m-0">
-							К оплате: {{ data.toPay }} руб. Оплачено: {{ data.pay }} руб.
+						<p class="mb-2">
+							<span class="font-semibold">К оплате:</span> {{ data.toPay }} руб. 
 						</p>
-						<p class="m-0">Оплачено за общие нужды: {{ data.payOur }}</p>
-						<p class="m-0">{{ data.comment }}</p>
+						<p class="mb-2">
+							<span class="font-semibold">Оплачено</span>: {{ data.pay || 0 }} руб.
+						</p>
+						<p class="mb-2"><span class="font-semibold">Оплачено за общие нужды:</span> {{ data.payOur || 0 }} руб.</p>
+						<p class="mb-2">{{ data.comment }}</p>
 					</AccordionTab>
 				</Accordion>
 			</div>
