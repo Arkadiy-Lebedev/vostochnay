@@ -1,10 +1,14 @@
 
 export default defineNuxtConfig({
   devtools: { enabled: false },
-  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss", "@hebilicious/vue-query-nuxt", '@pinia/nuxt'],
+  modules: ["@nuxtjs/google-fonts", 'nuxt-primevue', "@nuxtjs/tailwindcss", "@hebilicious/vue-query-nuxt", '@pinia/nuxt',  '@nuxtjs/device',],
 
   pinia: {
     storesDirs: ['./stores/**'],
+  },
+
+  device: {
+    refreshOnResize: true
   },
   
   primevue: {
