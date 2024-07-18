@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SwipeBottomNavigation } from "bottom-navigation-vue"
+import  SwipeBottomNavigation  from "bottom-navigation-vue"
 import "bottom-navigation-vue/dist/style.css"
 
 const route = useRoute()
