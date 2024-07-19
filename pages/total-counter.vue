@@ -28,7 +28,7 @@ const dataMounth = computed(() => {
   <div class="container mx-auto">
   
     <div class="bg-white border-1 border-slate-200  rounded-lg p-8">
-           <h3 class="text-2xl mt-12">История показаний</h3>
+           <h3 class="text-2xl font-semibold">История показаний</h3>
         <div class="card mt-1" v-if="pending">
           <Skeleton width="100%" height="6rem"></Skeleton>
           <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>

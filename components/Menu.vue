@@ -39,6 +39,7 @@ const logOut = () => {
         <Menubar :model="items" class="px-8 drop-shadow-md">
             <template #start>
                 <p class="mr-5">ЛОГО</p>
+                <NuxtImg src="/favicon.ico" />
             </template>
             <template #item="{ item, props, hasSubmenu, root }">
                     <NuxtLink v-if="item.role == userInfo.role || item.role == 'all'" class="flex items-center" :to="item?.link" v-ripple  v-bind="props.action">

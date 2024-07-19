@@ -124,7 +124,7 @@ const sendData = async () => {
 
 const differencePaySingleHouse = computed(() => {
 	if (differenceToPay.value) {
-		return (differenceToPay.value / (data.value.setting[0].houses - data.value.setting[0].exclude)).toFixed(2)
+		return (differenceToPay.value / (data.value?.setting[0]?.houses - data.value?.setting[0]?.exclude)).toFixed(2)
 	}
 	else {
 		return null
@@ -171,7 +171,7 @@ const dutyUser = computed(() => {
 </script>
 
 <template>
-	<div class="container mx-auto pt-5 pb-5 pl-3 pr-3  sm:p-0">
+	<div class="container mx-auto ">
 			<div v-if="data?.setting[0].message" class="m-2 mt-3 mb-3 ">
         <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
       </div>
