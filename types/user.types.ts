@@ -10,7 +10,7 @@ export interface IbaseUser {
     surname: string,
     family: string,    
     street:'',
-    house: number | null
+    number: ''
 }
 
 export interface IUserLogin extends IbaseUser {

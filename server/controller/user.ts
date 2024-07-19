@@ -17,7 +17,8 @@ const generateAccessToken = (id: number, role: string) => {
 }
 
 //чтение всех пользователей
-export const read = async () => {
+export const read = async (evt: H3Event) => {
+    
     try {
         const result = await userModel.read()
         return {

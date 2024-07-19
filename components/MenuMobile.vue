@@ -34,7 +34,8 @@ const logOut = () => {
     <div class="container mx-auto">
         <Menubar  class="px-8 drop-shadow-md">
             <template #start>
-                <p class="mr-5">ЛОГО</p>
+                <NuxtImg  width="15" src="/logo.svg" />
+          
             </template>
            
             <template #end>

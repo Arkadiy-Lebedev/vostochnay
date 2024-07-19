@@ -6,7 +6,7 @@ export const useUserStore = defineStore('userStore', () => {
     surname: '',
     family: '',
     street: '',
-    house: null,
+    number: '',
     phone: '',
     role: ''
 }) 

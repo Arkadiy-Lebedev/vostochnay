@@ -2,8 +2,6 @@ import { sql } from '~~/server/db'
 import { default as jwt } from 'jsonwebtoken';
 
 
-
-
 export interface UserModel {
     id: number,
     name: string,
@@ -20,7 +18,6 @@ export interface UserModel {
 
 //чтение всех
 export const read = async () => {
-
  
     const result = await sql({
         query: 'SELECT id, name, surname, family, street, number, phone, role FROM users'

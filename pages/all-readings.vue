@@ -207,21 +207,37 @@ const filter = () => {
 </script>
 
 <template>
-   <div class="container mx-auto">
+  <div class="container mx-auto" v-if="pending">
+   <div class="bg-white border-2 border-slate-200  rounded-2xl p-8" >
+          <Skeleton width="100%" height="6rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+        </div>
+        <div class="bg-white border-2 border-slate-200  rounded-2xl p-8 mt-8" >
+          <Skeleton width="100%" height="3rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+          <Skeleton class="mt-3" width="100%" height="3rem"></Skeleton>
+          <Skeleton width="100%" height="10rem" class="mt-3"></Skeleton>
+        </div>
+  </div>
 
-    <div class="bg-white border-1 border-slate-200  rounded-lg p-8 ">   
-      <div  v-if="userInfo.role == 'admin'" class="flex gap-3">
-        <Button  class="mb-7" @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined />       
-      <Button class="mb-7" @click="isDialogAllMessage = true" label="Сообщение всем" icon="pi pi-envelope" outlined />      
+   <div v-else class="container mx-auto">
+
+    <div  class="bg-white border-2 border-slate-200  rounded-2xl p-8 ">   
+      <div  v-if="userInfo.role == 'admin'" class="flex gap-3 flex-wrap mb-7">
+        <Button   @click="isDialogDop = true" label="Добавить расходы" icon="pi pi-list" outlined size="small"/>       
+      <Button @click="isDialogAllMessage = true" label="Сообщение всем" icon="pi pi-envelope" outlined size="small"/>      
       </div>  
-      <div class="mb-10">
+      <div v-if="data?.setting[0].message" class="mb-10">
         <InlineMessage severity="warn">Общее сообщение: {{ data?.setting[0].message }} </InlineMessage>
       </div>
       <div class="w-52">
          <Calendar :maxDate="today"  showIcon fluid v-model="date" view="month" dateFormat="MM" placeholder="Выбирете месяц" />      
       </div>
      
-      <div class="sm:grid sm:grid-cols-3">
+      <div class="sm:grid sm:grid-cols-3 mt-7">
         <div v-if="data?.main && data?.main.length > 0" class="col-span-2">
           <div v-if="!data?.main[0].count && userInfo.role == 'admin'" >         
             <Sendcount :month="nowMonth" :lastCount="data?.main[0].lastCount" @refresh="refresh()"></Sendcount>
@@ -249,30 +265,38 @@ const filter = () => {
           <InlineMessage severity="warn"> Данные не найдены</InlineMessage>
         </div>
 
-        <div class="p-7  ">
-         
-          <div class="p-7 border-2 border-indigo-200 rounded-2xl">
-
-            <Button class="mb-10" v-if="!data?.main[0] || !data?.main[0].waterHouses" @click="calculateMonth"
-              label="Рассчитать месяц" icon="pi pi-calculator"
-              :disabled="(listUserGetCount ? listUserGetCount?.length : 0) > 0"
-              :loading="isLoading" />
-            <p class=" text-base font-semibold leading-7 text-gray-900 ">Не оплатили: {{ listUserDuty?.length }} человек
-            </p>
-            <div class="mt-2" v-for="data in listUserDuty" :key="data?.id">
-              <Tag severity="warning" value="Warning"> {{ data?.street + ' д. ' + data?.number }} </Tag>
-            </div>
-          </div>
-
-        </div>
 
       </div>
 
 
 
-      <p @click="filter" class="text-xl font-semibold leading-7 text-gray-900 mt-7 mb-6">По домам</p>
-      <DataTable :value="dataFilter" tableStyle="min-width: 50rem">
-        <Column v-if="userInfo.role == 'admin'" header="ФИО">
+      
+    </div>
+
+  <div class="bg-white border-2 border-slate-200  rounded-2xl p-8 sm:mt-8 mt-5">
+    <div class="sm:p-2 ">
+         
+         <div class="p-1 mt-2 sm:p-1 border-2 border-purple-300 rounded-2xl ">
+
+           <Button class="mb-10" v-if="!data?.main[0] || !data?.main[0].waterHouses" @click="calculateMonth"
+             label="Рассчитать месяц" icon="pi pi-calculator"
+             :disabled="(listUserGetCount ? listUserGetCount?.length : 0) > 0"
+             :loading="isLoading" />
+
+           <Accordion :activeIndex="0" multiple>
+           <AccordionTab 
+             :header="'Не оплатили:' + ' ' + listUserDuty?.length+ ' чел.' ">
+             <div class="mt-2" v-for="data in listUserDuty" :key="data?.id">
+             <Tag severity="warning" value="Warning"> {{ data?.street + ' д. ' + data?.number }} </Tag>
+           </div>
+            
+           </AccordionTab>
+         </Accordion>
+         </div>
+       </div>
+    <p @click="filter" class="text-xl font-semibold leading-7 text-gray-900 mt-10 mb-6">По домам:</p>
+      <DataTable :value="dataFilter" tableStyle="min-width: 40rem">
+        <Column v-if="userInfo.role == 'admin'" header="ФИО" style="width: 200px">
             <template #body="slotProps">
               <p @click="setUser(slotProps.data.id)" class="hover:opacity-75 cursor-pointer underline"> {{ slotProps.data.family }} {{ slotProps.data.name }} {{ slotProps.data.surname }} <br> <span>{{ slotProps.data.street }} {{ slotProps.data.number }}</span></p>
               <p class="mt-2">{{ slotProps.data.phone }}</p>
@@ -288,18 +312,7 @@ const filter = () => {
             <p class=""> {{ slotProps.data.street }} {{ slotProps.data.number }}</p>
           </template>
         </Column>
-         <Column v-if="userInfo.role == 'admin'" header="Сообщения">
-          <template #body="slotProps">
-            <p v-if="slotProps.data.items[0]?.comment" class="text-sm text-gray-600"><span class="font-semibold">За месяц:</span> {{ slotProps.data.items[0].comment }}</p>
-              <p v-if="slotProps.data?.comment" class="text-sm text-gray-600"><span class="font-semibold">Общее:</span> {{ slotProps.data.comment }}</p>
-          </template>
-        </Column>
-        <Column header="Расход">
-          <template #body="slotProps">
-            {{ slotProps.data.items.length > 0 ? slotProps.data.items[0].differenceLastWater : 'не переданы' }}
-          </template>
-        </Column>
-        <Column header="Оплата">
+         <Column header="Оплата" style="width: 50px">
           <template #body="slotProps">
             <div v-if="slotProps.data.items.length > 0">
               <Tag v-if="slotProps.data.items[0].isPay" severity="success" value="Оплачено"></Tag>
@@ -317,8 +330,18 @@ const filter = () => {
 
           </template>
         </Column>
-
-        <template #footer> In total there are products. </template>
+        <Column header="Расход" style="width: 50px">
+          <template #body="slotProps">
+            {{ slotProps.data.items.length > 0 ? slotProps.data.items[0].differenceLastWater : 'не переданы' }}
+          </template>
+        </Column>
+        <Column v-if="userInfo.role == 'admin'" header="Сообщения" style="width: 350px">
+          <template #body="slotProps">
+            <p v-if="slotProps.data.items[0]?.comment" class="text-sm text-gray-600"><span class="font-semibold">За месяц:</span> {{ slotProps.data.items[0].comment }}</p>
+              <p v-if="slotProps.data?.comment" class="text-sm text-gray-600"><span class="font-semibold">Общее:</span> {{ slotProps.data.comment }}</p>
+          </template>
+        </Column>    
+   
       </DataTable>
 
     </div>

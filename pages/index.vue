@@ -291,7 +291,7 @@ const dutyUser = computed(() => {
 						<p>К оплате с дома:</p>
 						<div class="">
 							<Skeleton v-if="pending" width="7rem" height="2rem"></Skeleton>
-							<Tag v-else class="text-lg" severity="secondary" :value="expensesSingleHouse + ' руб.'"></Tag>
+							<Tag v-else class="text-lg" severity="warn" :value="expensesSingleHouse + ' руб.'"></Tag>
 						</div>
 					</div>
 					

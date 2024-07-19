@@ -27,6 +27,6 @@ const { isMobile, isDesktop, isTablet } = useDevice()
 </template>
 <style scoped>
 .wrapper-slot {
-	@apply pt-5 pb-20 pl-3 pr-3  sm:p-0;
+	@apply pt-5 pb-20 pl-3 pr-3  ;
 }
 </style>

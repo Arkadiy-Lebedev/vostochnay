@@ -14,13 +14,13 @@ export const items = ref<IMenu[]>([
     },
     {
         label: 'Общий счетчик',
-        icon: 'pi pi-star',
+        icon: 'pi pi-box',
         link: '/total-counter',
          role: 'all'
     },
         {
-        label: 'Список',
-        icon: 'pi pi-star',
+        label: 'Общие показания',
+        icon: 'pi pi-list',
         link: '/all-readings',
         role: 'all'
     }

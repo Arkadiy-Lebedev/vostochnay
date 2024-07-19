@@ -10,7 +10,7 @@ const options = ref([
 	{ id: 1, icon: 'pi pi-home', title: 'Главная', path: { name: "index" }},
 	{ id: 2, icon: 'pi pi-box', title: 'Счетчик', path: { name: "total-counter"} },
 { id: 3, icon: 'pi pi-list', title: 'Общие', path: { name: "all-readings"} },
-{ id: 4, icon: 'pi pi-cog', title: 'Настройки', path: { name: "all-readings"} },
+{ id: 4, icon: 'pi pi-cog', title: 'Настройки', path: { name: "setting"} },
 ])
 const selected = ref(2)
 

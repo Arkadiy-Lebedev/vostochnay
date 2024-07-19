@@ -49,7 +49,7 @@ if(error.value){
   userInfo.phone = data.value.user.phone
   userInfo.role = data.value.user.role
   userInfo.street = data.value.user.street
-  userInfo.house = data.value.user.house
+  userInfo.number = data.value.user.number
   
   tokenCookie.value = data.value.token
 
@@ -62,13 +62,13 @@ if(error.value){
 
 <template>
 
-<div class="flex min-h-dvh flex-col justify-center px-6 py-12 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company">
-    <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Данные для входа</h2>
+<div class="flex min-h-dvh flex-col justify-center px-6  lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">      
+    <div class="bg-white border-2 border-slate-200  rounded-2xl p-8" >
+      <div class="sm:mx-auto sm:w-full sm:max-w-sm mb-10">
+    <NuxtImg  src="/logo.svg"  class="mx-auto w-auto h-20"/>
   </div>
-
-  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <h2 class="mb-7 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Данные для входа</h2>
     <form class="space-y-6" >
       <div class="w-full">
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Телефон</label>
@@ -94,6 +94,7 @@ if(error.value){
         <NuxtLink to="/regin" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Регистрация</NuxtLink>
     </p>
   </div>
+</div>
 </div>
   </template>
   <style>

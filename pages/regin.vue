@@ -23,7 +23,7 @@ const user = reactive<IUserLogin>({
     password:  null,
     repeatPassword:  null,
     street: '',
-    house: null,
+    house: '',
     startCount: null,
 
 }) 
@@ -74,13 +74,13 @@ if(error.value){
 </script>
 
 <template>
-<div class="flex min-h-dvh flex-col justify-center px-6 py-12 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <img class="mx-auto h-10 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company">
-    <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Регистрация</h2>
-  </div>
+<div class="flex min-h-dvh flex-col justify-center px-6 lg:px-8">
+
 
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <div class="bg-white border-2 border-slate-200  rounded-2xl p-8" >
+  
+          <h2 class="mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Регистрация</h2>
     <form class="space-y-6" >
       <div class="w-full">
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Телефон</label>
@@ -115,7 +115,7 @@ if(error.value){
       <div class="w-full flex gap-5 items-center">
         <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Номер дома</label>
         <div class="mt-2 ">     
-          <InputNumber class="w-28" v-model="user.house" />
+          <InputText class="w-28" v-model="user.house" />
         </div>
       </div>
       <div class="w-full ">
@@ -151,6 +151,7 @@ if(error.value){
       <NuxtLink to="/login" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"> Авторизироваться</NuxtLink>
     </p>
   </div>
+</div>
 </div>
   </template>
   <style>

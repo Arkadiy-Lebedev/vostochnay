@@ -1,4 +1,5 @@
 import { useUserStore } from '../stores/user.store'
+import type { IUser } from '@/types/user.types'
 export default defineNuxtRouteMiddleware(async (to, from) => {
     const { userInfo } = useUserStore()
     if (userInfo.role) {
@@ -6,7 +7,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     const tokenCookie = useCookie('tokenUser')
-  const { data } = await useFetch('/api/auth', {
+  const { data } = await useFetch<{user:IUser[]}>('/api/auth', {
 
 	headers: {
 		Authorization: String(tokenCookie.value),
@@ -14,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
      
 
   })
-    console.log(data.value?.user)
+
     if (data.value?.user) {
     userInfo.name = data.value?.user[0].name
     userInfo.surname = data.value?.user[0].surname
@@ -22,7 +23,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     userInfo.phone = data.value?.user[0].phone
     userInfo.role = data.value?.user[0].role
     userInfo.street = data.value?.user[0].street
-    userInfo.house = data.value?.user[0].house
+    userInfo.number = data.value?.user[0].number
         return 
     } else {
         console.log(34534)
